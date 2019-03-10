@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.netron90.correction.personnalize.PowerPointForm">
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"></android.support.v7.widget.Toolbar>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/container_power_point_data"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_above="@id/savePowerPointDate"></android.support.v7.widget.RecyclerView>
+
+    <Button
+        android:id="@+id/savePowerPointDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary"
+        android:drawableLeft="@drawable/ic_done_black_24dp"
+        android:text="@string/save_power_point_data"
+        android:textColor="@color/colorWhite"/>
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_above="@id/savePowerPointDate"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        app:fab_icon="@drawable/ic_add_white_24dp"
+        app:fab_colorNormal="@color/colorAccent"
+        app:fab_colorPressed="@color/colorAccentDark"/>
+
+</RelativeLayout>

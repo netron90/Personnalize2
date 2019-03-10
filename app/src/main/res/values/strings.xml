@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">Personnalize</string>
+    <string name="app_name_uppercase">PERSONNALIZE</string>
+    <string name="btn_facebook_signin">Connect with Facebook</string>
+    <string name="btn_gmail_signin">Connect with Gmail</string>
+    <string name="no_file_selected">No file selected. Try to pick a file.</string>
+    <string name="dialog_builder_title">Delete document</string>
+    <string name="dialog_builder_message">Do you really want delete this document ?</string>
+    <string name="dialog_builder_title_phone">Your phone number</string>
+    <string name="dialog_builder_message_phone">Please inter your phone number that we can use to join you after work has done</string>
+    <string name="detail_activity_mise_en_page">Mise en page dudocument</string>
+    <string name="detail_activity_power_point">Power Point du document</string>
+    <string name="detail_activity_mode">Payement par MTN/MOOV</string>
+    <string name="detail_select_date">  Cliquer ici</string>
+    <string name="detail_select_date_desc">Date de remise:</string>
+    <string name="facebook_app_id">542933056229375</string>
+    <string name="fb_login_protocol_scheme">fb542933056229375</string>
+    <string name="connection_network_failed">Connection to server failed. Please verify your internet connection and try again.</string>
+    <string name="document_upload_success">Document upload successfuly!</string>
+    <string name="document_upload_failded">Document upload Failed! Server not respond.</string>
+    <string name="power_point_option">Option Power Point</string>
+    <string name="mise_en_forme_option">Mise en forme du document</string>
+    <string name="delivery_date">Date de remise</string>
+    <string name="no_date_selected">Aucune date</string>
+    <string name="send_document">Envoyer le document</string>
+    <string name="save_power_point_data">ENREGISTRER LES DONNEES</string>
+    <string name="diapo_idea">Idée principale de la diapositive</string>
+    <string name="diapo_content">Indiquer ici ce que devra contenir cette diapo</string>
+    <string name="diapo_img">Aucune image pour cette diapo</string>
+    <string name="add_diapo_img">Fournir des image pour cette diapositive</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

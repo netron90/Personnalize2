@@ -1,0 +1,70 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.netron90.correction.personnalize.MemoireFragmentEmpty"
+    android:id="@+id/container_fragment_empty"
+    >
+
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:id="@+id/file_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="102dp"
+        android:background="@drawable/stroke_file_icon">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_insert_drive_file_black_24dp"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/text_nothing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_file_selected"
+        android:layout_below="@id/file_empty"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+    <ProgressBar
+        android:id="@+id/progressbar_doc_inprogress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_nothing"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/text_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressbar_doc_inprogress"
+        android:text="Creating document..."
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="6dp"
+        android:visibility="gone"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+
+
+
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        app:fab_colorNormal="@color/colorAccent"
+        app:fab_colorPressed="@color/colorAccentDark"
+        app:fab_icon="@drawable/ic_add_white_24dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center"
+        />
+
+</RelativeLayout>

@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.netron90.correction.personnalize.MemoireFragment"
+    android:id="@+id/memoire_fragment_container"
+    >
+
+    <!-- TODO: Update blank fragment layout -->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/progressbar_doc_inprogress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_nothing"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        />
+    <TextView
+        android:id="@+id/text_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressbar_doc_inprogress"
+        android:text="Creating document..."
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="6dp"
+        android:visibility="gone"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_file_exist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        app:fab_colorNormal="@color/colorAccent"
+        app:fab_colorPressed="@color/colorAccentDark"
+        app:fab_icon="@drawable/ic_add_white_24dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center"
+        />
+
+</RelativeLayout>

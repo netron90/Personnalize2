@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "134607968337",
+    "firebase_url": "https://personnalize-b19b4.firebaseio.com",
+    "project_id": "personnalize-b19b4",
+    "storage_bucket": "personnalize-b19b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134607968337:android:d153bcaa003556d4",
+        "android_client_info": {
+          "package_name": "com.netron90.correction.personnalize"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "134607968337-sp79gddb1r7pop39b52juja7i06c3tj0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.netron90.correction.personnalize",
+            "certificate_hash": "b30d462f9bf8ec15e3245cc5cdfdd5790b3ba8c8"
+          }
+        },
+        {
+          "client_id": "134607968337-s5ktr1pr4cp8ogf0vbb0n7gv471c1ll0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgu8Hu1RJgxrIUpqhJOxcdAEApA32o4aQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "134607968337-s5ktr1pr4cp8ogf0vbb0n7gv471c1ll0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
