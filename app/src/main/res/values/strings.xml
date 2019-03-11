@@ -28,6 +28,7 @@
     <string name="diapo_content">Indiquer ici ce que devra contenir cette diapo</string>
     <string name="diapo_img">Aucune image pour cette diapo</string>
     <string name="add_diapo_img">Fournir des image pour cette diapositive</string>
+    <string name="nbr_image_diapo">image pour cette diapositive</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

@@ -9,5 +9,6 @@
     <color name="colorWhite">#ffffff</color>
     <color name="colorLigthWhite">#b4ffffff</color>
     <color name="colorLigthBlack">#b4545454</color>
+    <color name="colorText">#757575</color>
     <color name="colorDarkhBlack">#df404040</color>
 </resources>

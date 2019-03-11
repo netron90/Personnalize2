@@ -22,35 +22,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <ImageView
+                    android:id="@+id/delete_diapo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_delete_black_24dp"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="16dp"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
             </RelativeLayout>
             <RelativeLayout
-                android:id="@+id/diapo_title"
+                android:id="@+id/diapo_title_block"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/icon_delete_diapo">
+                android:layout_below="@id/icon_delete_diapo"
+                >
                 <TextView
+                    android:id="@+id/diapo_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Diapositive 1"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/colorText"
                     />
             </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/separator1"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@id/diapo_title"
+                android:layout_below="@id/diapo_title_block"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="150dp"
-                android:background="@color/colorDarkhBlack"
+                android:layout_marginTop="12dp"
+                android:background="@color/colorText"
                 ></RelativeLayout>
             <RelativeLayout
                 android:id="@+id/diapo_idea"
@@ -58,7 +64,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/separator1"
                 android:layout_marginTop="12dp"
-                android:layout_marginLeft="16dp">
+                android:layout_marginLeft="16dp"
+                android:padding="6dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -73,18 +80,22 @@
                 android:layout_below="@id/diapo_idea"
                 android:layout_marginTop="12dp">
                 <EditText
-                    android:id="@+id/editText"
+                    android:id="@+id/diapo_text_content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/diapo_content"
-                    android:inputType="textMultiLine" />
+                    android:inputType="textMultiLine"
+                    android:padding="16dp"
+                    android:background="@drawable/diapo_content_stroke"/>
             </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/img_diapo_block"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/diapo_content"
-                android:layout_marginTop="6dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:padding="4dp">
                 <TextView
                     android:id="@+id/image_diapo"
                     android:layout_width="wrap_content"
@@ -95,16 +106,17 @@
             <RelativeLayout
                 android:id="@+id/separator2"
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="1dp"
                 android:layout_below="@id/img_diapo_block"
                 android:layout_marginTop="6dp"
-                android:background="@color/colorDarkhBlack"></RelativeLayout>
+                android:background="@color/colorText"></RelativeLayout>
             <RelativeLayout
+                android:id="@+id/add_new_pictures"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/separator2"
-                android:padding="16dp"
-                android:background="?attr/selectableItemBackground"
+                android:padding="12dp"
+                android:foreground="?attr/selectableItemBackground"
                 android:clickable="true">
                 <ImageView
                     android:id="@+id/add_img_diapo"

@@ -11,7 +11,7 @@
         android:layout_marginTop="12dp"
         app:cardUseCompatPadding="true"
         app:cardCornerRadius="@dimen/cardview_default_radius"
-        app:cardElevation="@dimen/cardview_default_elevation"
+        app:cardElevation="4dp"
         >
         <RelativeLayout
             android:layout_width="match_parent"
@@ -34,7 +34,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/block_delete_doc"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:padding="8dp">
 
                 <TextView
                     android:id="@+id/document_name"
@@ -42,6 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="16dp"
                     android:text="NOM DU DOCUMENT"
+                    android:textColor="@color/colorText"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     />
                 <TextView
@@ -54,7 +56,7 @@
                     android:gravity="right"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="16dp"
-                    android:textSize="18sp"/>
+                    android:textSize="14sp"/>
             </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/bar_spli_1"
@@ -62,7 +64,7 @@
                 android:layout_height="1dp"
                 android:layout_below="@id/bloc1"
                 android:layout_marginTop="8dp"
-                android:background="@color/colorDarkhBlack"
+                android:background="@color/colorText"
                 android:layout_marginRight="16dp"
                 android:layout_marginLeft="16dp"></RelativeLayout>
             <RelativeLayout
@@ -70,7 +72,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/bar_spli_1"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="2dp"
+                android:padding="8dp">
                 <TextView
                     android:id="@+id/text_option_power_point"
                     android:layout_width="wrap_content"
@@ -91,7 +94,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/block2"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="2dp"
+                android:padding="8dp">
                 <TextView
                     android:id="@+id/text_option_mise_en_forme"
                     android:layout_width="wrap_content"
@@ -112,7 +116,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/block3"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="2dp"
+                android:padding="8dp">
                 <TextView
                     android:id="@+id/text_option_date"
                     android:layout_width="wrap_content"
@@ -133,16 +138,17 @@
             <RelativeLayout
                 android:id="@+id/bar_spli_2"
                 android:layout_width="match_parent"
-                android:layout_height="2dp"
+                android:layout_height="1dp"
                 android:layout_below="@id/block4"
                 android:layout_marginTop="8dp"
-                android:background="@color/colorDarkhBlack">
+                android:background="@color/colorText">
 
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/bar_spli_2">
+                android:layout_below="@id/bar_spli_2"
+                android:padding="4dp">
                 <RelativeLayout
                     android:id="@+id/edit_power_point"
                     android:layout_width="wrap_content"

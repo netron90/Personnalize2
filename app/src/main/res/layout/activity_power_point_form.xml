@@ -9,34 +9,61 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"></android.support.v7.widget.Toolbar>
+        android:background="@color/colorPrimary"
+        app:popupTheme="@style/Base.ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"></android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/container_power_point_data"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        android:layout_above="@id/savePowerPointDate"></android.support.v7.widget.RecyclerView>
+        >
 
-    <Button
-        android:id="@+id/savePowerPointDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:background="@color/colorPrimary"
-        android:drawableLeft="@drawable/ic_done_black_24dp"
-        android:text="@string/save_power_point_data"
-        android:textColor="@color/colorWhite"/>
+    </android.support.v7.widget.RecyclerView>
+
     <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_diapo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_above="@id/savePowerPointDate"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
-        app:fab_icon="@drawable/ic_add_white_24dp"
+        app:fab_colorPressed="@color/colorAccentDark"
         app:fab_colorNormal="@color/colorAccent"
-        app:fab_colorPressed="@color/colorAccentDark"/>
+        app:fab_icon="@drawable/ic_add_white_24dp"/>
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/savePowerPointDate"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:background="@drawable/backgroud_save_power_point_data"-->
+        <!--android:foreground="?attr/selectableItemBackground"-->
+        <!--android:clickable="true"-->
+        <!--android:padding="12dp">-->
+
+       <!--<RelativeLayout-->
+           <!--android:layout_width="match_parent"-->
+           <!--android:layout_height="wrap_content">-->
+           <!--<ImageView-->
+               <!--android:id="@+id/icon_save_power_point_data"-->
+               <!--android:layout_width="wrap_content"-->
+               <!--android:layout_height="wrap_content" -->
+               <!--android:src="@drawable/ic_done_black_24dp"-->
+               <!--android:layout_centerHorizontal="true"-->
+               <!--android:layout_marginRight="16dp"-->
+               <!--android:layout_toLeftOf="@id/text_save_power_point_data"/>-->
+           <!--<TextView-->
+               <!--android:id="@+id/text_save_power_point_data"-->
+               <!--android:layout_width="wrap_content"-->
+               <!--android:layout_height="wrap_content"-->
+               <!--android:layout_centerHorizontal="true"-->
+               <!--android:text="@string/save_power_point_data"-->
+               <!--android:textColor="@color/colorWhite"-->
+               <!--android:layout_centerVertical="true"/>-->
+       <!--</RelativeLayout>-->
+    <!--</RelativeLayout>-->
+
 
 </RelativeLayout>

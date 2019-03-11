@@ -43,7 +43,8 @@
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainProcess" />
-        <activity android:name=".PowerPointForm"></activity>
+        <activity android:name=".PowerPointForm"
+            android:parentActivityName=".MainProcess"></activity>
     </application>
 
 </manifest>

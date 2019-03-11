@@ -36,9 +36,10 @@ import java.util.List;
 
 public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHolder> {
 
-    List<DocumentUser> documentUserList;
+    public static List<DocumentUser> documentUserList;
     private DeleteDocument deleteDocument;
     private int position;
+    private final int COMPTEUR = 1;
     private Context context;
     private Boolean powerPointFlag = false, miseEnFormeFlag = false;
     public static TextView deliveryDate;
@@ -58,6 +59,8 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.documentName.setText(documentUserList.get(position).documentName);
         holder.documentPage.setText(documentUserList.get(position).pageNumber + " Pages");
+        holder.miseEnFormeSwitch.setChecked(documentUserList.get(position).miseEnForme);
+        holder.powerPointSwitch.setChecked(documentUserList.get(position).powerPoint);
     }
 
     @Override
@@ -154,6 +157,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                     if(powerPointSwitch.isChecked())
                     {
                         Intent powerPointEdit = new Intent(context, PowerPointForm.class);
+                        Log.d("POWERPOINT FORM", "Position: " + getLayoutPosition());
                         powerPointEdit.putExtra("itemPosition", getLayoutPosition());
                         context.startActivity(powerPointEdit);
                     }
@@ -214,16 +218,20 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "scodelux").build();
 
-            //1) Delete one document from database
+            //1) delete all diapo
+            db.userDao().deleteAllDiapos();
+            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
+            editor.putBoolean(PowerPointForm.FIRST_INSERTION, false).commit();
+            //2) Delete one document from database
             db.userDao().deleteOneDocument(documentUserList.get(position).documentName);
-            //2)select all document
+            //3)select all document
             documentUserList = db.userDao().selectAllDocument();
             //)remove element from arrayList of User documents
             //documentUserList.remove(position);
             if(documentUserList.size() == 0)
             {
 
-                SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
+                editor  = MainProcess.sharedPreferences.edit();
                 editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
                 return true;
             }
@@ -262,9 +270,11 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         protected Void doInBackground(Integer... integers) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "scodelux").build();
-            db.userDao().updatePowerPoint(powerPointFlag, integers[0]);
+
+            db.userDao().updatePowerPoint(powerPointFlag, documentUserList.get(integers[0]).id);
             List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
-            Log.d("POWER POINT VALUE", "Edit power Point: " + documentUsers.get(integers[0]).powerPoint);
+            Log.d("POWER POINT VALUE", "Edit power PointEdit power Point: " + documentUsers.get(integers[0]).powerPoint + " powerPoin Flag: "+ powerPointFlag + " Position: "+ integers[0]);
+            //position = 0;
             return null;
         }
     }
@@ -275,9 +285,10 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         protected Void doInBackground(Integer... integers) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "scodelux").build();
-            db.userDao().updateMiseEnForme(miseEnFormeFlag, integers[0]);
+            db.userDao().updateMiseEnForme(miseEnFormeFlag, documentUserList.get(integers[0]).id);
             List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
             Log.d("MISE EN FORME", "Edit mise en forme: " + documentUsers.get(integers[0]).miseEnForme);
+
             return null;
         }
     }
