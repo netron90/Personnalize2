@@ -44,6 +44,7 @@
                     android:layout_marginLeft="16dp"
                     android:text="NOM DU DOCUMENT"
                     android:textColor="@color/colorText"
+                    android:maxLength="16"
                     android:textAppearance="@style/TextAppearance.AppCompat.Large"
                     />
                 <TextView

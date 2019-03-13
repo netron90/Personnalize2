@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.netron90.correction.personnalize.Database.DiapositiveFormat;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
 
@@ -158,7 +159,8 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                     {
                         Intent powerPointEdit = new Intent(context, PowerPointForm.class);
                         Log.d("POWERPOINT FORM", "Position: " + getLayoutPosition());
-                        powerPointEdit.putExtra("itemPosition", getLayoutPosition());
+                        powerPointEdit.putExtra("itemPosition", documentUserList.get(getLayoutPosition()).id);
+                        Log.d("DOCUMENT ID", "Document Id selected: " + documentUserList.get(getLayoutPosition()).id);
                         context.startActivity(powerPointEdit);
                     }
                 }
@@ -222,6 +224,14 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             db.userDao().deleteAllDiapos();
             SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
             editor.putBoolean(PowerPointForm.FIRST_INSERTION, false).commit();
+
+//            List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
+//            Log.d("DOCUMENT SIZE", "Taille du document supprime: " + documentUsers.size());
+//            for(int i = 1; i <= documentUsers.size(); i++)
+//            {
+//                List<DiapositiveFormat>diapositiveFormats = db.userDao().selectDiapos(i);
+//            }
+
             //2) Delete one document from database
             db.userDao().deleteOneDocument(documentUserList.get(position).documentName);
             //3)select all document

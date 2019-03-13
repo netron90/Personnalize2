@@ -62,4 +62,12 @@ public interface UserDao {
     //Update diapositive content field
     @Query("UPDATE diapositive_format SET nombre_image = :nbr_image WHERE id= :id")
     public void updateDiapoImage(int nbr_image, int id);
+
+    //Reset document ID
+    @Query("UPDATE document_user SET id = :id")
+    public void updateDocumentId(int id);
+
+    //Delete diapo where id == @Id
+    @Query("DELETE FROM diapositive_format WHERE id = :id")
+    public void deleteOneDiapo(int id);
 }

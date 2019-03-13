@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,7 @@ import com.netron90.correction.personnalize.Database.DiapositiveFormat;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PowerPointForm extends AppCompatActivity {
@@ -32,9 +34,12 @@ public class PowerPointForm extends AppCompatActivity {
     private FloatingActionButton addDiapo;
     private SharedPreferences sharedPreferences;
     public static final String FIRST_INSERTION = "first_insertion";
-    private int diapositiveNumber = 1;
+    public static int diapositiveNumber = 1;
     private int position = 0;
-    private DiapositiveAdapter diapositiveAdapter;
+    public static DiapositiveAdapter diapositiveAdapter;
+    private final String DIAPOSITIVE_TITLE = "Diapositive 1";
+    public static int idDocument = 0;
+    public static DocumentUser documentUser = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +50,8 @@ public class PowerPointForm extends AppCompatActivity {
         addDiapo = (FloatingActionButton) findViewById(R.id.fab_add_diapo);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         position = getIntent().getIntExtra("itemPosition", 0);
-//        position = position + 1;
+        diapositiveNumber = 1;
+        //position = position + 1;
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -74,85 +80,61 @@ public class PowerPointForm extends AppCompatActivity {
         @Override
         protected List<DiapositiveFormat> doInBackground(Void... voids) {
 
-            Boolean firstInsert = sharedPreferences.getBoolean(FIRST_INSERTION, false);
-            if(!firstInsert)
+            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "scodelux").build();
+
+            //TODO: SELECT DOCUMENT AT SPECIFIC POSITION
+            documentUser = db.userDao().selectDocument(position);
+            idDocument = documentUser.id;
+
+            documentUser = db.userDao().selectDocument(idDocument);
+            Log.d("LOAD DATA", "Document ID: " + documentUser.id);
+            Log.d("LOAD DATA", "Document Name: " + documentUser.documentName);
+            Log.d("LOAD DATA", "Document Mise en forme: " + documentUser.miseEnForme);
+            Log.d("LOAD DATA", "Document Power Point: " + documentUser.powerPoint);
+
+            //TODO:GET ALL DIAPOSITIVES WHERE "idDocument == documentUser.id"
+            List<DiapositiveFormat> diapoDocument = db.userDao().selectDiapos(idDocument);
+
+            //TODO:CHECK IF "diapoDocument.size() == 0"
+            if (diapoDocument.size() == 0)
             {
-                Log.d("FIRST INSERTION", "first insertion start");
-                //TODO: GET SPECIFIC DOCUMENT AT SPECIFIC POSITION
-                final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                        PersonnalizeDatabase.class, "scodelux").build();
+                Log.d("LOAD DATA", "There are no diapositive in this document");
 
-                DocumentUser documentUser = db.userDao().selectDocument(DocumentAdapter.documentUserList.get(position).id);
-                Log.d("FIRST INSERTION ID", "first insertion id: " + DocumentAdapter.documentUserList.get(position).id);
-                //TODO: INSER FIRST DIAPO
-                DiapositiveFormat diapositiveFormat = new DiapositiveFormat();
-                diapositiveFormat.idDocument = documentUser.id;
-                Log.d("DIAPOSITIVE", "diapo id: " + diapositiveNumber);
-                diapositiveFormat.diapoTitle = "Diapositive "+ diapositiveNumber;
-                Log.d("DIAPOSITIVE", "diapo title: " + diapositiveFormat.diapoTitle);
-                diapositiveFormat.diapoDesc  = "";
-                Log.d("DIAPOSITIVE", "diapo description: " + diapositiveFormat.diapoDesc);
-                diapositiveFormat.nbrImage   = 0;
-                Log.d("DIAPOSITIVE", "diapo image: " + diapositiveFormat.nbrImage);
+                //TODO: CREATE DiapositiveFormat OBJECT
+                DiapositiveFormat firstDiapo = new DiapositiveFormat();
+                firstDiapo.idDocument = idDocument;
+                firstDiapo.diapoTitle = DIAPOSITIVE_TITLE;
+                firstDiapo.diapoDesc  = "";
+                firstDiapo.nbrImage   = 0;
 
-                db.userDao().insertDiapo(diapositiveFormat);
+                db.userDao().insertDiapo(firstDiapo);
 
-                List<DiapositiveFormat> diapositiveFormats = db.userDao().selectDiapos(DocumentAdapter.documentUserList.get(position).id);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(FIRST_INSERTION, true).commit();
-
-//                for(int i = 0; i < diapositiveFormats.size(); i++)
-//                {
-//                    diapositiveNumber = diapositiveFormats.get(i).id;
-//                }
-                return diapositiveFormats;
+                //TODO: SELECT ALL DIAPO IN THIS DOCUMENT
+                List<DiapositiveFormat> allDiapo = db.userDao().selectDiapos(idDocument);
+                return allDiapo;
             }
-            else{
-                Log.d("SECOND INSERTION", "second insertion start");
-                //TODO: LOAD ALL DIAPO
-                final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                        PersonnalizeDatabase.class, "scodelux").build();
-
-                DocumentUser documentUser = db.userDao().selectDocument(DocumentAdapter.documentUserList.get(position).id);
-
-                List<DiapositiveFormat> diapositiveFormats = db.userDao().selectDiapos(documentUser.id);
-                if(diapositiveFormats.size() == 0)
-                {
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(FIRST_INSERTION, true).commit();
-                    return null;
-                }
-                else
-                {
-                    for(int i = 0; i < diapositiveFormats.size(); i++)
-                    {
-                        diapositiveNumber = diapositiveFormats.get(i).id;
-                    }
-                    return diapositiveFormats;
-                }
-
+            else
+            {
+                //TODO: SELECT ALL DIAPO IN THIS DOCUMENT
+                List<DiapositiveFormat> allDiapo = db.userDao().selectDiapos(idDocument);
+                diapositiveNumber = allDiapo.size();
+                return allDiapo;
             }
+
+
         }
 
         @Override
         protected void onPostExecute(List<DiapositiveFormat> diapositiveFormats) {
             super.onPostExecute(diapositiveFormats);
 
-
-            if(diapositiveFormats == null)
-            {
-                LoadDiapo loadDiapo = new LoadDiapo();
-                loadDiapo.execute();
-            }
-            else
-            {
-                diapositiveAdapter = new DiapositiveAdapter(diapositiveFormats,getApplicationContext());
-                recyclerView.setAdapter(diapositiveAdapter);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-                recyclerView.setHasFixedSize(true);
-                diapositiveNumber++;
-            }
-
+            diapositiveNumber++;
+            diapositiveAdapter = new DiapositiveAdapter(diapositiveFormats, getApplicationContext());
+            recyclerView.setAdapter(diapositiveAdapter);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         }
     }
@@ -162,49 +144,51 @@ public class PowerPointForm extends AppCompatActivity {
 
         @Override
         protected List<DiapositiveFormat> doInBackground(Void... voids) {
-            //TODO: GET SPECIFIC DOCUMENT AT SPECIFIC POSITION
+
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                PersonnalizeDatabase.class, "scodelux").build();
 
-            //TODO: save first what is done previewsly
-            if(TextUtils.isEmpty(DiapositiveAdapter.diapoHolderContent.getText().toString()))
+
+            //TODO: SAVE PREVIEW INSERTION
+            if(diapositiveAdapter == null)
             {
-                return null;
+                Log.d("ADD DATA", "Adapter is null: ");
+                return  null;
             }
-            else
-            {
-                List<DiapositiveFormat> diapoList = DiapositiveAdapter.diapositiveFormatsList;
-                //TODO: GET DIAPOSITIVE TITLE AND SAVE IT INTO DATABASE
-                //String diapoTitle  = diapoList.get(i).diapoTitle;
-                db.userDao().updateDiapoTitle(DiapositiveAdapter.diapoHolderTitle.getText().toString(), diapoList.get(position).id);
-              //  Log.d("DIAPOSITIVE", "diapo Title saved: " + diapoTitle + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
+            else{
+                for(int i = 0; i < DiapositiveAdapter.diapositiveFormatsList.size(); i++)
+                {
 
-                //TODO: GET DIAPOSITIVE DESCRIPTION AND SAVE IT INTO DATABASE
-               // String diapoContent = diapoList.get(i).diapoDesc;
-                db.userDao().updateDiapoDesc(DiapositiveAdapter.diapoHolderContent.getText().toString(), diapoList.get(position).id);
-                //Log.d("DIAPOSITIVE", "diapo Content saved: " + diapoContent + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
+                    diapositiveAdapter.notifyItemChanged(i);
+                    String titleDiapo   = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoTitle;
+                    String descContent  = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoDesc;
+                    int nbrImage        = DiapositiveAdapter.diapositiveFormatsList.get(i).nbrImage;
 
-                //TODO: GET DIAPOSITIVE IMAGE NUMBER AND SAVE IT INTO DATABASE
-                //int diapoImage  = diapoList.get(i).nbrImage;
-                db.userDao().updateDiapoImage(DiapositiveAdapter.diapoHolderImage, diapoList.get(position).id);
-               // Log.d("DIAPOSITIVE", "diapo Image saved: " + diapoImage + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
+                    Log.d("SAVE DATA", "Add Data DIAPO id: " + DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                    Log.d("ADD DATA", "Diapositive Number: " + diapositiveNumber);
+                    Log.d("ADD DATA", "Preview diapo title: " + titleDiapo);
+                    Log.d("ADD DATA", "Preview diapo content: " + descContent);
+                    Log.d("ADD DATA", "Preview diapo Image: " + nbrImage);
 
-                DocumentUser documentUser = db.userDao().selectDocument(DocumentAdapter.documentUserList.get(position).id);
+                    db.userDao().updateDiapoTitle(titleDiapo, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                    db.userDao().updateDiapoDesc(descContent, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                    db.userDao().updateDiapoImage(nbrImage, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
 
-                //TODO: INSER FIRST DIAPO
-                DiapositiveFormat diapositiveFormat = new DiapositiveFormat();
-                diapositiveFormat.idDocument = documentUser.id;
-                diapositiveFormat.diapoTitle = "Diapositive "+ diapositiveNumber;
-                diapositiveFormat.diapoDesc  = "";
-                diapositiveFormat.nbrImage   = 0;
+                }
+                //TODO: CREATE NEW DiapositiveFormat OBJCT
+                DiapositiveFormat addNewDiapo = new DiapositiveFormat();
+                addNewDiapo.idDocument = idDocument;
+                addNewDiapo.diapoTitle = "Diapositive " + diapositiveNumber;
+                addNewDiapo.diapoDesc  = "";
+                addNewDiapo.nbrImage   = 0;
 
-                db.userDao().insertDiapo(diapositiveFormat);
-
-                List<DiapositiveFormat> diapositiveFormats = db.userDao().selectDiapos(DocumentAdapter.documentUserList.get(position).id);
+                db.userDao().insertDiapo(addNewDiapo);
+                List<DiapositiveFormat> diapoSaved = db.userDao().selectDiapos(idDocument);
                 DiapositiveAdapter.diapositiveFormatsList.clear();
-                DiapositiveAdapter.diapositiveFormatsList.addAll(diapositiveFormats);
-                return diapositiveFormats;
+
+                return diapoSaved;
             }
+
 
 
         }
@@ -213,14 +197,10 @@ public class PowerPointForm extends AppCompatActivity {
         protected void onPostExecute(List<DiapositiveFormat> diapositiveFormats) {
             super.onPostExecute(diapositiveFormats);
 
-            if(diapositiveFormats == null)
+            if(diapositiveFormats != null)
             {
-                Toast.makeText(PowerPointForm.this, "Veuillez remplir d'abord les informations de la présente diapositive", Toast.LENGTH_SHORT).show();
-            }
-            else {
-
+                DiapositiveAdapter.diapositiveFormatsList.addAll(diapositiveFormats);
                 diapositiveAdapter.notifyDataSetChanged();
-                diapositiveNumber++;
             }
 
         }
@@ -235,24 +215,31 @@ public class PowerPointForm extends AppCompatActivity {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
                     PersonnalizeDatabase.class, "scodelux").build();
+            Log.d("SAVE DATA", "Taille de la liste des diao: " + DiapositiveAdapter.diapositiveFormatsList.size());
+            diapositiveAdapter.notifyItemChanged(diapositiveNumber);
 
-            for(int i = 0; i < diapoList.size(); i++)
+            //List<DiapositiveFormat> getDiapoSaved = db.userDao().selectDiapos(idDocument);
+            for(int i = 0; i < DiapositiveAdapter.diapositiveFormatsList.size(); i++)
             {
-                //TODO: GET DIAPOSITIVE TITLE AND SAVE IT INTO DATABASE
-                String diapoTitle  = diapoList.get(i).diapoTitle;
-                db.userDao().updateDiapoTitle(DiapositiveAdapter.diapoHolderTitle.getText().toString(), diapoList.get(i).id);
-                Log.d("DIAPOSITIVE", "diapo Title saved: " + diapoTitle + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
 
-                //TODO: GET DIAPOSITIVE DESCRIPTION AND SAVE IT INTO DATABASE
-                String diapoContent = diapoList.get(i).diapoDesc;
-                db.userDao().updateDiapoDesc(DiapositiveAdapter.diapoHolderContent.getText().toString(), diapoList.get(i).id);
-                Log.d("DIAPOSITIVE", "diapo Content saved: " + diapoContent + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
+                //diapositiveAdapter.notifyItemChanged(i);
+                String titleDiapo   = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoTitle;
+                String descContent  = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoDesc;
+                int nbrImage        = DiapositiveAdapter.diapositiveFormatsList.get(i).nbrImage;
 
-                //TODO: GET DIAPOSITIVE IMAGE NUMBER AND SAVE IT INTO DATABASE
-                int diapoImage  = diapoList.get(i).nbrImage;
-                db.userDao().updateDiapoImage(DiapositiveAdapter.diapoHolderImage, diapoList.get(i).id);
-                Log.d("DIAPOSITIVE", "diapo Image saved: " + diapoImage + " taille: "+ diapoList.size() + " ID: " + diapoList.get(i).id);
+                Log.d("SAVE DATA", "DIAPO id: " + DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                Log.d("SAVE DATA", "Diapositive Number: " + diapositiveNumber);
+                Log.d("SAVE DATA", "Preview diapo title: " + titleDiapo);
+                Log.d("SAVE DATA", "Preview diapo content: " + descContent);
+                Log.d("SAVE DATA", "Preview diapo Image: " + nbrImage);
+
+                db.userDao().updateDiapoTitle(titleDiapo, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                db.userDao().updateDiapoDesc(descContent, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+                db.userDao().updateDiapoImage(nbrImage, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
+
             }
+
+
             return null;
         }
 
