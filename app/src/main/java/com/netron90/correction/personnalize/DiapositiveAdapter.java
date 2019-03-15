@@ -1,9 +1,13 @@
 package com.netron90.correction.personnalize;
 
+import android.app.Activity;
+import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.ActivityChooserView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,13 +31,15 @@ import java.util.List;
  * Created by CHRISTIAN on 10/03/2019.
  */
 
-public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.ViewHolder> {
+public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.ViewHolder> implements AddPictureDiapoFragment.OnFragmentInteractionListener{
 
     public static List<DiapositiveFormat> diapositiveFormatsList;
     private Context context;
+    public static final int DIAPOSITIVE_BROWSER = 3;
     public static TextView diapoHolderTitle, diapoHolderContent;
     public static int    diapoHolderImage = 0;
     private int layoutPosition = 0;
+    private int positionList = 0;
     private ViewHolder viewHolder;
 
     public DiapositiveAdapter(List<DiapositiveFormat> diapositiveFormats, Context context) {
@@ -51,6 +57,7 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
 
+        positionList = position;
         holder.diapoTitle.setText(diapositiveFormatsList.get(position).diapoTitle);
         holder.diapoContent.setText(diapositiveFormatsList.get(position).diapoDesc);
         if(diapositiveFormatsList.get(position).nbrImage == 0)
@@ -75,7 +82,10 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
 
             @Override
             public void afterTextChanged(Editable editable) {
-                diapositiveFormatsList.get(position).diapoDesc = editable.toString();
+                Log.d("TEXT CHANGE", "Le texte a change a la position: "+ positionList + ".\n Le texte est: " + editable.toString());
+
+                diapositiveFormatsList.get(positionList).diapoDesc = editable.toString();
+                //notifyItemChanged(positionList);
             }
         });
 //        refreshData(position);
@@ -87,31 +97,21 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
         return diapositiveFormatsList.size();
     }
 
+    @Override
+    public void onFragmentInteraction(int i) {
+        if(i == 1)
+        {
+//            Log.d("ADD IMAGE FRAG", "Add image diapositive");
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView deleteDiapo;
         private TextView diapoTitle, diapoContent, nbrImageDiapo;
         private RelativeLayout addNewPictures;
 
-        public ImageView getDeleteDiapo() {
-            return deleteDiapo;
-        }
 
-        public TextView getDiapoTitle() {
-            return diapoTitle;
-        }
-
-        public TextView getDiapoContent() {
-            return diapoContent;
-        }
-
-        public TextView getNbrImageDiapo() {
-            return nbrImageDiapo;
-        }
-
-        public RelativeLayout getAddNewPictures() {
-            return addNewPictures;
-        }
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -120,6 +120,8 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
             diapoTitle    = (TextView)itemView.findViewById(R.id.diapo_title);
             diapoContent  = (TextView) itemView.findViewById(R.id.diapo_text_content);
             nbrImageDiapo = (TextView) itemView.findViewById(R.id.image_diapo);
+//            AddPictureDiapoFragment addPictureDiapoFragment = new AddPictureDiapoFragment();
+//            MainProcess.fragmentManager.beginTransaction().replace(R.id.add_new_pictures, addPictureDiapoFragment).commit();
             addNewPictures= (RelativeLayout) itemView.findViewById(R.id.add_new_pictures);
 
 
@@ -154,6 +156,30 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
                     deleteOneDiapo.execute(layoutPosition);
                 }
             });
+
+            addNewPictures.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(context.getClass().equals(PowerPointForm.class))
+                    {
+                        Log.d("CHOOSE IMAGE", "iS CONTEXT");
+                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        intent.setType("image/*");
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                        ((PowerPointForm) context).startActivityForResult(Intent.createChooser(intent, "Chose your document"), DIAPOSITIVE_BROWSER);
+                    }
+//                    new PowerPointForm.selectDiapoImage() {
+//                        @Override
+//                        public void onSelectDiapoImage(PowerPointForm powerPointForm) {
+//                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                            intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+//                            powerPointForm.startActivityForResult(Intent.createChooser(intent, "Selectionner des images"), DIAPOSITIVE_BROWSER);
+//                        }
+//                    };
+                }
+            });
         }
     }
 
@@ -183,7 +209,8 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
                 {
                     DiapositiveFormat diapositiveFormat = new DiapositiveFormat();
                     diapositiveFormat.idDocument = PowerPointForm.idDocument;
-                    diapositiveFormat.diapoTitle = "Diapositive " + String.valueOf(PowerPointForm.diapositiveNumber);
+                    diapositiveFormat.diapoTitle = "Diapositive " + String.valueOf(i + 1);
+                    db.userDao().updateDiapoTitle(diapositiveFormat.diapoTitle, allDiapo.get(i).id);
                     diapositiveFormat.diapoDesc  = allDiapo.get(i).diapoDesc;
                     diapositiveFormat.nbrImage   = allDiapo.get(i).nbrImage;
                     DiapositiveAdapter.diapositiveFormatsList.add(diapositiveFormat);
@@ -239,12 +266,4 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
         }
     }
 
-    public void refreshData(int position)
-    {
-        notifyItemChanged(position);
-    }
-
-    public ViewHolder getViewHolder() {
-        return viewHolder;
-    }
 }

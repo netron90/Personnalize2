@@ -194,7 +194,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             deleteDocument = new DeleteDocument();
-                            deleteDocument.execute();
+                            deleteDocument.execute(documentUserList.get(position).id);
                             Log.d("Item Position", "item Position: " + position);
                         }
                     });
@@ -211,19 +211,19 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         }
     }
 
-    public class DeleteDocument extends AsyncTask<Void, Void, Boolean>
+    public class DeleteDocument extends AsyncTask<Integer, Void, Boolean>
     {
 
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected Boolean doInBackground(Integer... integers) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "scodelux").build();
 
             //1) delete all diapo
-            db.userDao().deleteAllDiapos();
-            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
-            editor.putBoolean(PowerPointForm.FIRST_INSERTION, false).commit();
+            db.userDao().deleteAllDiapos(integers[0]);
+//            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
+//            editor.putBoolean(PowerPointForm.FIRST_INSERTION, false).commit();
 
 //            List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
 //            Log.d("DOCUMENT SIZE", "Taille du document supprime: " + documentUsers.size());
@@ -234,20 +234,38 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
 
             //2) Delete one document from database
             db.userDao().deleteOneDocument(documentUserList.get(position).documentName);
+            documentUserList.clear();
             //3)select all document
-            documentUserList = db.userDao().selectAllDocument();
+            List<DocumentUser> documentSelect = db.userDao().selectAllDocument();
+
+            for(int i = 0; i < documentSelect.size(); i++)
+            {
+                DocumentUser doc = new DocumentUser();
+                doc.id = documentSelect.get(i).id;
+                doc.documentName = documentSelect.get(i).documentName;
+                doc.pageNumber = documentSelect.get(i).pageNumber;
+                doc.lastNameUser = documentSelect.get(i).lastNameUser;
+                doc.firstNameUSer = documentSelect.get(i).firstNameUSer;
+                doc.emailUser = documentSelect.get(i).emailUser;
+                doc.phoneUser = documentSelect.get(i).phoneUser;
+                doc.documentPath = documentSelect.get(i).documentPath;
+                doc.powerPoint = documentSelect.get(i).powerPoint;
+                doc.miseEnForme = documentSelect.get(i).miseEnForme;
+                doc.deliveryDate = documentSelect.get(i).deliveryDate;
+                documentUserList.add(doc);
+            }
             //)remove element from arrayList of User documents
             //documentUserList.remove(position);
             if(documentUserList.size() == 0)
             {
 
-                editor  = MainProcess.sharedPreferences.edit();
-                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
+//                editor  = MainProcess.sharedPreferences.edit();
+//                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
                 return true;
             }
             else
             {
-                //documentUserList.remove(position);
+
                 return false;
             }
 

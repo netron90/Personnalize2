@@ -48,8 +48,8 @@ public interface UserDao {
     public DiapositiveFormat selectDiapo(String diapo_name);
 
     //Select all diapo format with idDocument == id
-    @Query("DELETE FROM diapositive_format")
-    public void deleteAllDiapos();
+    @Query("DELETE FROM diapositive_format WHERE id_document = :id_document")
+    public void deleteAllDiapos(int id_document);
 
     //Update diapositive title field
     @Query("UPDATE diapositive_format SET diapo_title = :diapo_title WHERE id= :id")

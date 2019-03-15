@@ -1,0 +1,25 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/add_image_diapo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="com.netron90.correction.personnalize.AddPictureDiapoFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <ImageView
+        android:id="@+id/add_img_diapo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add_black_24dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="16dp"/>
+    <TextView
+        android:id="@+id/detail_img_added"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/add_img_diapo"
+        android:text="@string/add_diapo_img"/>
+
+</RelativeLayout>
