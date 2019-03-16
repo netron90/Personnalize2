@@ -46,6 +46,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     public static TextView deliveryDate;
     private FragmentManager fragmentManager = null;
 
+
     public DocumentAdapter(List<DocumentUser> documentUser) {
         this.documentUserList = documentUser;
     }
@@ -62,6 +63,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         holder.documentPage.setText(documentUserList.get(position).pageNumber + " Pages");
         holder.miseEnFormeSwitch.setChecked(documentUserList.get(position).miseEnForme);
         holder.powerPointSwitch.setChecked(documentUserList.get(position).powerPoint);
+        holder.deliveryDates.setText(documentUserList.get(position).deliveryDate);
     }
 
     @Override
@@ -72,7 +74,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView iconDelete;
-        private TextView documentName, documentPage;
+        private TextView documentName, documentPage, deliveryDates;
         ImageView iconEditPowerPoint;
         private Switch powerPointSwitch, miseEnFormeSwitch;
         private RelativeLayout editPowerPoint, editDate, iconSend;
@@ -90,6 +92,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             powerPointSwitch   = (Switch) itemView.findViewById(R.id.switch_power_point_option);
             miseEnFormeSwitch  = (Switch) itemView.findViewById(R.id.switch_mise_en_forme_option);
             iconEditPowerPoint = (ImageView) itemView.findViewById(R.id.icon_edit_power_point);
+            deliveryDates       = (TextView) itemView.findViewById(R.id.text_date);
             deliveryDate       = (TextView) itemView.findViewById(R.id.text_date);
             editPowerPoint     = (RelativeLayout) itemView.findViewById(R.id.edit_power_point);
             editDate           = (RelativeLayout) itemView.findViewById(R.id.edit_date);
@@ -148,6 +151,8 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                 @Override
                 public void onClick(View view) {
                     DialogFragment dateChooser = new SelectDate();
+                    SelectDate.context = context;
+                    SelectDate.docId = documentUserList.get(position).id;
                     dateChooser.show(MainProcess.fragmentManagerDatePicker, "DatePicker");
                 }
             });
@@ -218,9 +223,14 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         protected Boolean doInBackground(Integer... integers) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             //1) delete all diapo
+            List<DiapositiveFormat>diapositiveFormats = db.userDao().selectDiapos(integers[0]);
+            for(int i = 0; i < diapositiveFormats.size(); i++)
+            {
+                db.userDao().deleteDiapoImagePath(diapositiveFormats.get(i).id);
+            }
             db.userDao().deleteAllDiapos(integers[0]);
 //            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
 //            editor.putBoolean(PowerPointForm.FIRST_INSERTION, false).commit();
@@ -297,7 +307,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         @Override
         protected Void doInBackground(Integer... integers) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             db.userDao().updatePowerPoint(powerPointFlag, documentUserList.get(integers[0]).id);
             List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
@@ -312,7 +322,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
         @Override
         protected Void doInBackground(Integer... integers) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
             db.userDao().updateMiseEnForme(miseEnFormeFlag, documentUserList.get(integers[0]).id);
             List<DocumentUser> documentUsers = db.userDao().selectAllDocument();
             Log.d("MISE EN FORME", "Edit mise en forme: " + documentUsers.get(integers[0]).miseEnForme);
@@ -322,6 +332,10 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
     }
 
     public static class SelectDate extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+
+        private String deliveryDateText = "";
+        public static Context context;
+        public static int docId;
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -339,12 +353,32 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             if(month >= 1 && month < 10)
             {
                 deliveryDate.setText(day + "/" + "0"+month + "/" + year);
+                deliveryDateText = deliveryDate.getText().toString();
+                UpdateDocumentDate updateDocumentDate = new UpdateDocumentDate();
+                updateDocumentDate.execute();
             }
             else
             {
                 deliveryDate.setText(day + "/" + month + "/" + year);
+                deliveryDateText = deliveryDate.getText().toString();
+                UpdateDocumentDate updateDocumentDate = new UpdateDocumentDate();
+                updateDocumentDate.execute();
             }
 
         }
+
+        public class UpdateDocumentDate extends AsyncTask<Void, Void, Void>
+        {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                final PersonnalizeDatabase db = Room.databaseBuilder(context,
+                        PersonnalizeDatabase.class, "personnalize").build();
+
+                db.userDao().updateDocumentDate(deliveryDateText, docId);
+                return null;
+            }
+        }
     }
+
+
 }

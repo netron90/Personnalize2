@@ -66,9 +66,13 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
             //diapoHolderImage = 0;
         }
         else {
-            holder.nbrImageDiapo.setText(diapositiveFormatsList.get(position).nbrImage + " " + R.string.nbr_image_diapo);
+            Log.d("SIZE", "Image Path Size in Adapter: " + diapositiveFormatsList.get(position).nbrImage);
+            int image = diapositiveFormatsList.get(position).nbrImage;
+            holder.nbrImageDiapo.setText(String.valueOf(image) + " " + context.getResources().getString(R.string.nbr_image_diapo));
             //diapoHolderImage = diapositiveFormatsList.get(position).nbrImage;
         }
+
+
         holder.diapoContent.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -166,7 +170,11 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                         intent.addCategory(Intent.CATEGORY_OPENABLE);
                         intent.setType("image/*");
+                        PowerPointForm.idDiapositive = diapositiveFormatsList.get(getLayoutPosition()).id;
+                        PowerPointForm.diapositivePosition = getLayoutPosition();
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                        //Log.d("DiapoId", "DiapoId is: " + diapositiveFormatsList.get(getLayoutPosition()).id);
+
                         ((PowerPointForm) context).startActivityForResult(Intent.createChooser(intent, "Chose your document"), DIAPOSITIVE_BROWSER);
                     }
 //                    new PowerPointForm.selectDiapoImage() {
@@ -188,7 +196,7 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
         @Override
         protected Boolean doInBackground(Integer... integers) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             //TODO: DCHECK IF THERE ARE ONLY ONE ELEMENT IN THE LIST
             if(DiapositiveAdapter.diapositiveFormatsList.size() == 1)
@@ -197,6 +205,7 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
             }else
             {
                 //TODO: DELETE ONE DIAPOSITIVEFROM DATABASE
+                db.userDao().deleteDiapoImagePath(DiapositiveAdapter.diapositiveFormatsList.get(integers[0]).id);
                 db.userDao().deleteOneDiapo(DiapositiveAdapter.diapositiveFormatsList.get(integers[0]).id);
                 PowerPointForm.diapositiveNumber--;
 

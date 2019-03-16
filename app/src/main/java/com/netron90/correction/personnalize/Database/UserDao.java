@@ -44,8 +44,8 @@ public interface UserDao {
     public List<DiapositiveFormat> selectDiapos(int id_document);
 
     //Select all diapo format with idDocument == id
-    @Query("SELECT * FROM diapositive_format WHERE diapo_title = :diapo_name")
-    public DiapositiveFormat selectDiapo(String diapo_name);
+    @Query("SELECT * FROM diapositive_format WHERE id = :id_diapo")
+    public DiapositiveFormat selectDiapo(int id_diapo);
 
     //Select all diapo format with idDocument == id
     @Query("DELETE FROM diapositive_format WHERE id_document = :id_document")
@@ -64,10 +64,22 @@ public interface UserDao {
     public void updateDiapoImage(int nbr_image, int id);
 
     //Reset document ID
-    @Query("UPDATE document_user SET id = :id")
-    public void updateDocumentId(int id);
+    @Query("UPDATE document_user SET delivery_date = :delivery_date WHERE id = :id")
+    public void updateDocumentDate(String delivery_date, int id);
 
     //Delete diapo where id == @Id
     @Query("DELETE FROM diapositive_format WHERE id = :id")
     public void deleteOneDiapo(int id);
+
+    //Insert DiapoImagePath Object
+    @Insert
+    public void insertDiapoImagePath(DiapoImagePath diapoImagePath);
+
+    //Select all DiapoImagePath Object
+    @Query("SELECT * FROM diapo_image_path WHERE id_path = :id_path")
+    public List<DiapoImagePath> selectDiapoImagePath(int id_path);
+
+    //Delete all DiapoImagePath Object
+    @Query("DELETE FROM diapo_image_path WHERE id_path = :id_path")
+    public void deleteDiapoImagePath(int id_path);
 }

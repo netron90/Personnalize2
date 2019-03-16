@@ -247,7 +247,7 @@ RootFragment.OnFragmentInteractionListener{
 
             //TODO: save information into database
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             DocumentUser documentUser = new DocumentUser();
             documentUser.documentName = fileName;
@@ -329,7 +329,7 @@ RootFragment.OnFragmentInteractionListener{
 
             //TODO: save information into database
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             DocumentUser documentUser = new DocumentUser();
             documentUser.documentName = fileName;
@@ -372,7 +372,7 @@ RootFragment.OnFragmentInteractionListener{
         protected List<DocumentUser> doInBackground(Void... voids) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
             List<DocumentUser> documentUsersListLoaded = db.userDao().selectAllDocument();
             Log.d("MainProcess", "documentUsersListLoaded size: "+documentUsersListLoaded.size());
             return documentUsersListLoaded;

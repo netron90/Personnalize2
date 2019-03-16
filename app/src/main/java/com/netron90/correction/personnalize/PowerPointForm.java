@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.netron90.correction.personnalize.Database.DiapoImagePath;
 import com.netron90.correction.personnalize.Database.DiapositiveFormat;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
@@ -46,9 +47,17 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
     public static DiapositiveAdapter diapositiveAdapter;
     private final String DIAPOSITIVE_TITLE = "Diapositive 1";
     public static int idDocument = 0;
+    public static int idDiapositive = 0;
+    public static int diapositivePosition = 0;
     public static DocumentUser documentUser = null;
     private Uri imageUri = null;
     private ClipData mClipData = null;
+    private  List<DiapoImagePath> diapoImagePathsSelected = null;
+    private String previewTitle = "";
+    private String previewContent = "";
+    private int totalSize = 0;
+    private boolean onLoad = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +91,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
         LoadDiapo loadDiapo = new LoadDiapo();
         loadDiapo.execute();
 
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -89,25 +99,43 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.d("DIAPO IMAGE", "Diapo file broser OK");
-        if(requestCode == DiapositiveAdapter.DIAPOSITIVE_BROWSER && requestCode == RESULT_OK && null != data)
+        if(requestCode == DiapositiveAdapter.DIAPOSITIVE_BROWSER && resultCode == RESULT_CANCELED)
         {
-            Log.d("DIAPO IMAGE", "Single image");
-            imageUri = data.getData();
-            SelectImage selectImage = new SelectImage();
-            selectImage.execute();
 
         }
         else
         {
-            Log.d("DIAPO IMAGE", "Multiple image");
-            if(data.getClipData() != null)
+            Log.d("DIAPO IMAGE", "Diapo file broser OK");
+            //idDiapositive = data.getIntExtra("diapoId", 0);
+            Log.d("DIAPO IMAGE", "Diapositive ID: " + idDiapositive);
+            Log.d("DIAPO IMAGE", "Diapositive position: " + diapositivePosition);
+            if(requestCode == DiapositiveAdapter.DIAPOSITIVE_BROWSER && requestCode == RESULT_OK && null != data)
             {
-                mClipData = data.getClipData();
-                SelectImageMultiple selectImageMultiple = new SelectImageMultiple();
-                selectImageMultiple.execute();
+//                Log.d("DIAPO IMAGE", "Single image");
+//                imageUri = data.getData();
+//                SelectImage selectImage = new SelectImage();
+//                selectImage.execute();
+
+            }
+            else
+            {
+                Log.d("DIAPO IMAGE", "Multiple image");
+                if(data.getClipData() != null)
+                {
+                    imageUri = null;
+                    mClipData = data.getClipData();
+                    SelectImageMultiple selectImageMultiple = new SelectImageMultiple();
+                    selectImageMultiple.execute();
+                }
+                else {
+                    imageUri = data.getData();
+                    mClipData = null;
+                    SelectImageMultiple selectImageMultiple = new SelectImageMultiple();
+                    selectImageMultiple.execute();
+                }
             }
         }
+
     }
 
     @Override
@@ -124,7 +152,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
         protected List<DiapositiveFormat> doInBackground(Void... voids) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
 
             //TODO: SELECT DOCUMENT AT SPECIFIC POSITION
             documentUser = db.userDao().selectDocument(position);
@@ -155,12 +183,24 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
 
                 //TODO: SELECT ALL DIAPO IN THIS DOCUMENT
                 List<DiapositiveFormat> allDiapo = db.userDao().selectDiapos(idDocument);
+                for(int i = 0; i < allDiapo.size(); i++)
+                {
+                    List<DiapoImagePath> diapoPath = db.userDao().selectDiapoImagePath(allDiapo.get(i).id);
+                    allDiapo.get(i).nbrImage = diapoPath.size();
+                }
                 return allDiapo;
             }
             else
             {
                 //TODO: SELECT ALL DIAPO IN THIS DOCUMENT
                 List<DiapositiveFormat> allDiapo = db.userDao().selectDiapos(idDocument);
+                for(int i = 0; i < allDiapo.size(); i++)
+                {
+                    List<DiapoImagePath> imagePaths = db.userDao().selectDiapoImagePath(allDiapo.get(i).id);
+                    Log.d("SIZE", "Image Path Size: " + imagePaths.size());
+                    allDiapo.get(i).nbrImage = imagePaths.size();
+                }
+
                 diapositiveNumber = allDiapo.size();
                 return allDiapo;
             }
@@ -173,11 +213,20 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
             super.onPostExecute(diapositiveFormats);
 
             //diapositiveNumber++;
-            diapositiveAdapter = new DiapositiveAdapter(diapositiveFormats, PowerPointForm.this);
-            recyclerView.setAdapter(diapositiveAdapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            if (onLoad == true)
+            {
+                diapositiveAdapter.notifyItemChanged(diapositivePosition);
+                onLoad = false;
+            }
+            else
+            {
+                diapositiveAdapter = new DiapositiveAdapter(diapositiveFormats, PowerPointForm.this);
+                recyclerView.setAdapter(diapositiveAdapter);
+                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+            }
+
 
         }
     }
@@ -189,7 +238,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
         protected List<DiapositiveFormat> doInBackground(Void... voids) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                PersonnalizeDatabase.class, "scodelux").build();
+                PersonnalizeDatabase.class, "personnalize").build();
 
 
             //TODO: SAVE PREVIEW INSERTION
@@ -274,7 +323,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
         protected Void doInBackground(Void... voids) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
+                    PersonnalizeDatabase.class, "personnalize").build();
             for(int i = 0; i < DiapositiveAdapter.diapositiveFormatsList.size(); i++)
             {
 
@@ -358,45 +407,234 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
         return super.onOptionsItemSelected(item);
     }
 
-    public class SelectImage extends AsyncTask<Void, Void, Void>
-    {
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            String[] filePath = {MediaStore.Images.Media.DATA};
-            Cursor cursor = getContentResolver().query(imageUri, filePath, null,null, null);
-
-            cursor.moveToFirst();
-
-            int columnIndex = cursor.getColumnIndex(filePath[0]);
-            String imagePath = cursor.getString(columnIndex);
-            Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
-            return null;
-        }
-    }
 
     public class SelectImageMultiple extends AsyncTask<Void, Void, Void>
     {
         @Override
         protected Void doInBackground(Void... voids) {
+
+            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "personnalize").build();
+
+            List<DiapositiveFormat> listTotal = new ArrayList<>();
             ArrayList<Uri> imageSelectedUri = new ArrayList<>();
-            String[] filePath = {MediaStore.Images.Media.DATA};
+//            String[] filePath = {MediaStore.Images.Media.DATA};
 
 
-            for(int i = 0; i< mClipData.getItemCount(); i++)
+            if(imageUri != null)
             {
-                ClipData.Item item = mClipData.getItemAt(i);
-                Uri uris = item.getUri();
-                imageSelectedUri.add(uris);
-                Cursor cursor = getContentResolver().query(uris, filePath, null,null, null);
-
-                cursor.moveToFirst();
-
-                int columnIndex = cursor.getColumnIndex(filePath[0]);
-                String imagePath = cursor.getString(columnIndex);
+                String imagePath = imageUri.getPath();
                 Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
+
+                DiapositiveFormat currentDiapo = db.userDao().selectDiapo(idDiapositive);
+                if(sharedPreferences.getBoolean("diapo_path_added", false) == false)
+                {
+                    //TODO:SAVE IMAGE PATH
+
+                    DiapoImagePath diapoImagePath = new DiapoImagePath();
+
+                    diapoImagePath.idPath = currentDiapo.id;
+                    diapoImagePath.imagePath = imagePath;
+
+                    db.userDao().insertDiapoImagePath(diapoImagePath);
+
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean("diapo_path_added", true).commit();
+
+                    //TODO: SELECT ALL DIAPOSITIVE IMAGES
+                    diapoImagePathsSelected = db.userDao().selectDiapoImagePath(currentDiapo.id);
+
+                    //TODO: GET PREVIEW INFO OF CURRENT DIAPO
+                    DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).nbrImage = diapoImagePathsSelected.size();
+
+                   // String diapositiveTitle = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoTitle;
+                    String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
+                    DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
+
+                    onLoad = true;
+////                    previewTitle = diapositiveTitle;
+////                    previewContent = diapositiveDescription;
+////                    onLoad = true;
+//
+//                    DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
+//
+//                    DiapositiveFormat d = new DiapositiveFormat();
+//                    d.id = currentDiapo.id;
+//                    d.diapoTitle = diapositiveTitle;
+//                    d.diapoDesc = diapositiveDescription;
+//                    d.nbrImage = diapoImagePathsSelected.size();
+
+                    //DiapositiveAdapter.diapositiveFormatsList.add(diapositivePosition, d);
+
+                   return null;
+
+                }
+                else
+                {
+                    //TODO: DELETE ALL DiapoImagePAth WHERE idPath == "currentDiapo.id"
+                    db.userDao().deleteDiapoImagePath(currentDiapo.id);
+
+                    //TODO: RECREATE NEW DiapoImagePAth
+                    DiapoImagePath diapoImagePath = new DiapoImagePath();
+
+                    diapoImagePath.idPath = currentDiapo.id;
+                    diapoImagePath.imagePath = imagePath;
+
+                    db.userDao().insertDiapoImagePath(diapoImagePath);
+
+                    //TODO: SELECT ALL DIAPOSITIVE IMAGES
+                    diapoImagePathsSelected = db.userDao().selectDiapoImagePath(currentDiapo.id);
+
+                    //TODO: GET PREVIEW INFO OF CURRENT DIAPO
+                    DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).nbrImage = diapoImagePathsSelected.size();
+                    String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
+                    DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
+
+                    onLoad = true;
+//                    previewTitle = diapositiveTitle;
+//                    previewContent = diapositiveDescription;
+//                    onLoad = true;
+
+//                    DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
+//
+//                    DiapositiveFormat d = new DiapositiveFormat();
+//                    d.id = currentDiapo.id;
+//                    d.diapoTitle = diapositiveTitle;
+//                    d.diapoDesc = diapositiveDescription;
+//                    d.nbrImage = diapoImagePathsSelected.size();
+                    return null;
+
+                }
+
+            }
+            else
+            {
+
+                if(mClipData.getItemCount() > 5)
+                {
+                    //DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).nbrImage = mClipData.getItemCount();
+                    totalSize = mClipData.getItemCount();
+                }
+                else
+                {
+                    DiapositiveFormat currentDiapo = db.userDao().selectDiapo(idDiapositive);
+                    if(sharedPreferences.getBoolean("diapo_path_added", false) == false)
+                    {
+                        for(int i = 0; i < mClipData.getItemCount(); i++)
+                        {
+
+                            ClipData.Item item = mClipData.getItemAt(i);
+                            Uri uris = item.getUri();
+                            imageSelectedUri.add(uris);
+                            String imagePath = imageSelectedUri.get(i).getPath();
+                            Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
+
+                            DiapoImagePath diapoImagePath = new DiapoImagePath();
+
+                            diapoImagePath.idPath = currentDiapo.id;
+                            diapoImagePath.imagePath = imagePath;
+
+                            db.userDao().insertDiapoImagePath(diapoImagePath);
+
+
+                        }
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean("diapo_path_added", true).commit();
+
+                        //TODO: SELECT ALL DIAPOSITIVE IMAGES
+                        diapoImagePathsSelected = db.userDao().selectDiapoImagePath(currentDiapo.id);
+
+                        //TODO: GET PREVIEW INFO OF CURRENT DIAPO
+                        DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).nbrImage = diapoImagePathsSelected.size();
+                        String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
+                        DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
+
+                        onLoad = true;
+//                        previewTitle = diapositiveTitle;
+//                        previewContent = diapositiveDescription;
+//                        onLoad = true;
+
+//                        DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
+//
+//                        DiapositiveFormat d = new DiapositiveFormat();
+//                        d.id = currentDiapo.id;
+//                        d.diapoTitle = diapositiveTitle;
+//                        d.diapoDesc = diapositiveDescription;
+//                        d.nbrImage = diapoImagePathsSelected.size();
+
+                    }
+                    else
+                    {
+                        //TODO: DELETE ALL DiapoImagePAth WHERE idPath == "currentDiapo.id"
+                        db.userDao().deleteDiapoImagePath(currentDiapo.id);
+
+                        for(int i = 0; i < mClipData.getItemCount(); i++)
+                        {
+
+                            //TODO: RECREATE NEW DiapoImagePAth
+                            DiapoImagePath diapoImagePath = new DiapoImagePath();
+                            ClipData.Item item = mClipData.getItemAt(i);
+                            Uri uris = item.getUri();
+                            imageSelectedUri.add(uris);
+                            String imagePath = imageSelectedUri.get(i).getPath();
+                            Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
+
+                            diapoImagePath.idPath = currentDiapo.id;
+                            diapoImagePath.imagePath = imagePath;
+
+                            db.userDao().insertDiapoImagePath(diapoImagePath);
+
+
+                        }
+                        //TODO: SELECT ALL DIAPOSITIVE IMAGES
+                        diapoImagePathsSelected = db.userDao().selectDiapoImagePath(currentDiapo.id);
+
+                        //TODO: GET PREVIEW INFO OF CURRENT DIAPO
+                        DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).nbrImage = diapoImagePathsSelected.size();
+                        String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
+                        DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
+
+                        onLoad = true;
+//                        String diapositiveTitle = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoTitle;
+//                        String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
+//
+//                        previewTitle = diapositiveTitle;
+//                        previewContent = diapositiveDescription;
+//
+//                        DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
+//
+//                        DiapositiveFormat d = new DiapositiveFormat();
+//                        d.id = currentDiapo.id;
+//                        d.diapoTitle = diapositiveTitle;
+//                        d.diapoDesc = diapositiveDescription;
+//                        d.nbrImage = diapoImagePathsSelected.size();
+
+                    }
+
+
+                }
+
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+//            Log.d("IMAGE DIAPO", "Nombre d'image: " + diapositiveFormats.get(diapositivePosition).nbrImage);
+//            diapositiveAdapter.notifyDataSetChanged();
+            if(totalSize > 5)
+            {
+                Toast.makeText(PowerPointForm.this, "Vous pouvez uniquement ajouter jusqu'à 5 images pour une diapo.", Toast.LENGTH_SHORT).show();
+                totalSize = 0;
+            }
+//            else
+//            {
+//                diapositiveAdapter.notifyItemChanged(diapositivePosition);
+//            }
+
+
         }
     }
 }

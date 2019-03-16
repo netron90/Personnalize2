@@ -28,7 +28,13 @@
     <string name="diapo_content">Indiquer ici ce que devra contenir cette diapo</string>
     <string name="diapo_img">Aucune image pour cette diapo</string>
     <string name="add_diapo_img">Fournir des image pour cette diapositive</string>
-    <string name="nbr_image_diapo">image pour cette diapositive</string>
+    <string name="nbr_image_diapo">image(s) pour cette diapositive</string>
+    <string name="detail_activity_power_point_edit">Edition du Power Point</string>
+    <string name="detail_activity_mise_en_forme_edit">Mise enforme du document</string>
+    <string name="detail_activity_facture_text">FACTURE</string>
+    <string name="detail_activity_correction_orthographe_text">Correction fautes d\'orthographe</string>
+    <string name="detail_activity_power_point_edition_text">Edition du Power Point du document</string>
+    <string name="detail_activity_mise_en_forme_text">Mise en forme du document</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

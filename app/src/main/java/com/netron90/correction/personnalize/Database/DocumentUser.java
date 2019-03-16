@@ -44,7 +44,7 @@ public class DocumentUser implements Parcelable {
     public boolean miseEnForme;
 
     @ColumnInfo(name = "delivery_date")
-    public boolean deliveryDate;
+    public String deliveryDate;
 
     public DocumentUser() {
     }
@@ -61,7 +61,7 @@ public class DocumentUser implements Parcelable {
         documentPath = in.readString();
         powerPoint = in.readByte() != 0;
         miseEnForme = in.readByte() != 0;
-        deliveryDate = in.readByte() != 0;
+        deliveryDate = in.readString();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class DocumentUser implements Parcelable {
         dest.writeString(documentPath);
         dest.writeByte((byte) (powerPoint ? 1 : 0));
         dest.writeByte((byte) (miseEnForme ? 1 : 0));
-        dest.writeByte((byte) (deliveryDate ? 1 : 0));
+        dest.writeString(deliveryDate);
     }
 
     @Override

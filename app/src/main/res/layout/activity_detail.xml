@@ -21,231 +21,316 @@
             android:id="@+id/bloc_facture"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="45"
+            android:layout_weight="50"
             android:background="@color/colorPrimary"
             >
             <RelativeLayout
                 android:id="@+id/icon_doc_accepted"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/circle_detail"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp">
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:src="@drawable/ic_insert_drive_file_black_document_24dp"
-                    android:layout_centerInParent="true"/>
+                android:layout_marginTop="12dp">
+                <TextView
+                    android:id="@+id/detail_document_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NOM DUDOCUMENT"
+                    android:layout_centerHorizontal="true"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                    android:textColor="@color/colorWhite"
+                    />
+                <TextView
+                    android:id="@+id/detail_delivery_date_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/detail_document_name"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:text="A remettreavant le"
+                    android:layout_centerHorizontal="true"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="@color/colorWhite"/>
+                <TextView
+                    android:id="@+id/detail_delivery_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/detail_delivery_date_text"
+                    android:gravity="center"
+                    android:layout_centerHorizontal="true"
+                    android:text="29/09/2019"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/colorWhite"
+                    android:layout_marginTop="16dp"/>
+
+                <TextView
+                    android:id="@+id/detail_document_page"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/detail_delivery_date"
+                    android:gravity="center"
+                    android:layout_alignParentRight="true"
+                    android:text="29/09/2019"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                    android:textColor="@color/colorWhite"
+                    android:layout_marginTop="12dp"
+                    android:layout_margin="16dp"/>
             </RelativeLayout>
-            <TextView
-                android:id="@+id/doc_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="4dp"
-                android:text="RAPPORT DE SOUTENANCE"
-                android:layout_marginTop="12dp"
-                android:layout_below="@id/icon_doc_accepted"
-                android:layout_centerHorizontal="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorWhite"/>
             <RelativeLayout
                 android:id="@+id/bar_total"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/colorWhite"
-                android:layout_marginRight="20dp"
-                android:layout_marginLeft="20dp"
-                android:layout_below="@id/doc_title"
+                android:layout_below="@id/icon_doc_accepted"
                 android:layout_marginTop="8dp"
                 ></RelativeLayout>
-            <TextView
-                android:id="@+id/text_total"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Document facture a"
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_below="@id/bar_total"
-                android:layout_marginLeft="20dp"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/colorWhite"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
-            <TextView
-                android:id="@+id/montant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1600 fCFA"
-                android:textStyle="bold"
-                android:textSize="20sp"
-                android:layout_below="@id/text_total"
-                android:layout_marginTop="6dp"
-                android:layout_marginLeft="20dp"
-                android:textColor="@color/colorWhite"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                android:background="@color/colorPrimaryDark"
+                >
+                <RelativeLayout
+                    android:id="@+id/first_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    >
+                    <ImageView
+                        android:id="@+id/detail_icon_power_point"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_clear_black_24dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:id="@+id/detail_text_power_point"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/detail_icon_power_point"
+                        android:text="@string/detail_activity_power_point_edit"
+                        android:textColor="@color/colorWhite"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_marginLeft="20dp"
+                        />
+                    <TextView
+                        android:id="@+id/nbr_diapo_power_point"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:text="non"
+                        android:textColor="@color/colorWhite"
+                        android:layout_marginRight="16dp"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+                        />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/second_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/first_detail"
+                    android:layout_marginTop="4dp"
+                    android:padding="8dp"
+                    >
+                    <ImageView
+                        android:id="@+id/detail_icon_mise_en_forme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_done_black_24dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:id="@+id/detail_text_page_mise_en_forme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/detail_icon_mise_en_forme"
+                        android:text="@string/detail_activity_mise_en_forme_edit"
+                        android:textColor="@color/colorWhite"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_marginLeft="20dp"
+                        />
+                    <TextView
+                        android:id="@+id/nbr_page_mise_en_forme"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="10"
+                        android:text="30 Pages"
+                        android:textColor="@color/colorWhite"
+                        android:gravity="center"
+                        android:layout_gravity="center_vertical"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="16dp"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+
+                        />
+                </RelativeLayout>
+            </RelativeLayout>
+
         </RelativeLayout>
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="55">
-            <android.support.v7.widget.CardView
+            android:layout_weight="50">
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginRight="12dp"
-                android:layout_marginLeft="12dp"
-                android:layout_marginTop="20dp"
-                app:cardUseCompatPadding="true"
-                app:cardElevation="@dimen/cardview_default_elevation"
-                app:cardCornerRadius="@dimen/cardview_default_radius"
-                >
+                android:layout_height="match_parent">
+                <RelativeLayout
+                    android:id="@+id/bloc_facture_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+                    <TextView
+                        android:id="@+id/facture_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/detail_activity_facture_text"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_marginLeft="16dp"/>
+                    <TextView
+                        android:id="@+id/facture"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="6500 f CFA"
+                        android:textStyle="bold"
+                        android:textColor="@color/colorAccent"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="16dp"/>
+                </RelativeLayout>
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    >
-                    <RelativeLayout
-                        android:id="@+id/block_details"
+                    android:layout_height="1dp"
+                    android:background="@color/colorLigthBlack"
+                    android:layout_below="@id/bloc_facture_text"></RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/bloc_correction_faute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/bloc_facture_text"
+                    android:padding="16dp">
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
                         <TextView
-
-                            android:layout_width="wrap_content"
+                            android:id="@+id/correction_text"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:text="Nombre de page:"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Tooltip" />
+                            android:layout_weight="50"
+                            android:text="@string/detail_activity_correction_orthographe_text"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:layout_marginLeft="16dp"/>
                         <TextView
-                            android:id="@+id/doc_page"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/facture_correction"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="15 pages"
-                            android:layout_centerVertical="true"
+                            android:layout_weight="50"
+                            android:gravity="right"
+                            android:text="2000 f CFA"
+                            android:layout_gravity="center_vertical"
                             android:textStyle="bold"
-                            android:textColor="@color/colorDarkhBlack"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:layout_alignParentRight="true"
-                            android:layout_marginRight="12dp"
-                            />
-                    </RelativeLayout>
+                            android:layout_marginRight="16dp"/>
+                    </LinearLayout>
 
-                    <RelativeLayout
-                        android:id="@+id/bar_doc_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_below="@id/block_details"
-                        android:background="@color/colorLigthBlack"></RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/block_complement3"
-                        android:layout_below="@id/bar_doc_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:layout_marginTop="12dp">
-                        <TextView
-                            android:id="@+id/date_select_desc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:text="@string/detail_select_date_desc"
-                            android:layout_marginLeft="12dp"
-                            android:textColor="@color/colorDarkhBlack"
-                            android:textSize="16sp"
-                            android:textStyle="bold"/>
-                        <TextView
-                            android:id="@+id/date_select"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:text="@string/detail_select_date"
-                            android:textColor="@color/colorAccent"
-                            android:layout_marginRight="12dp"/>
-
-                    </RelativeLayout>
-                    <RelativeLayout
-                        android:id="@+id/block_complement1"
-                        android:layout_below="@id/block_complement3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp">
-                        <android.support.v7.widget.AppCompatCheckBox
-                            android:id="@+id/checkBox_msPage"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginLeft="12dp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:text="@string/detail_activity_mise_en_page"
-                            android:layout_marginRight="12dp"/>
-                    </RelativeLayout>
-                    <RelativeLayout
-                        android:id="@+id/block_complement2"
-                        android:layout_below="@id/block_complement1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp">
-                        <android.support.v7.widget.AppCompatCheckBox
-                            android:id="@+id/checkBox_power_point"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginLeft="12dp"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:text="@string/detail_activity_power_point"
-                            android:layout_marginRight="12dp"/>
-                    </RelativeLayout>
-
-                    <RelativeLayout
-                        android:id="@+id/block_complement4"
-                        android:layout_below="@id/block_complement2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="4dp"
-                        android:paddingBottom="4dp">
-                        <TextView
-                            android:id="@+id/payement_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:text="@string/detail_activity_mode"
-                            android:layout_marginLeft="12dp"/>
-                        <Switch
-                            android:id="@+id/mode_payement"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginRight="12dp"
-                            android:layout_alignParentRight="true"/>
-                    </RelativeLayout>
                 </RelativeLayout>
-            </android.support.v7.widget.CardView>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorLigthBlack"
+                    android:layout_below="@id/bloc_correction_faute"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"></RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/bloc_power_point_edition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/bloc_correction_faute"
+                    android:padding="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/power_point_edition_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="50"
+                            android:text="@string/detail_activity_power_point_edition_text"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:layout_marginLeft="16dp"/>
+                        <TextView
+                            android:id="@+id/facture_power_point"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="50"
+                            android:gravity="right"
+                            android:text="-"
+                            android:layout_gravity="center_vertical"
+                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="16dp"/>
+                    </LinearLayout>
+
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorLigthBlack"
+                    android:layout_below="@id/bloc_power_point_edition"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"></RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/bloc_mise_en_forme_edition"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/bloc_power_point_edition"
+                    android:padding="16dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/mise_en_forme_edition_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="50"
+                            android:text="@string/detail_activity_mise_en_forme_text"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:layout_marginLeft="16dp"/>
+                        <TextView
+                            android:id="@+id/facture_mise_en_forme"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="50"
+                            android:gravity="right"
+                            android:text="3000 f CFA"
+                            android:layout_gravity="center_vertical"
+                            android:textStyle="bold"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="16dp"/>
+                    </LinearLayout>
+
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorLigthBlack"
+                    android:layout_below="@id/bloc_power_point_edition"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginRight="16dp"></RelativeLayout>
+            </RelativeLayout>
+
         </ScrollView>
     </LinearLayout>
-    <RelativeLayout
-        android:id="@+id/block_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="16dp">
-        <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/send_document"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
 
-            app:fab_icon="@drawable/ic_send_white_24dp"
-            app:fab_colorNormal="@color/colorAccent"
-            app:fab_colorPressed="@color/colorAccentDark"
-            />
-    </RelativeLayout>
 
 </RelativeLayout>
