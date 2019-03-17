@@ -178,11 +178,25 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                     Intent intent = new Intent(context, DetailActivity.class);
                     String documentName = documentUserList.get(position).documentName;
                     int documentPage = documentUserList.get(position).pageNumber;
-                    Log.d("PageDoc", "Document Page Adapter: "+documentPage);
+
+                    String userEmail    = documentUserList.get(position).emailUser;
+                    String userPhone    = documentUserList.get(position).phoneUser;
                     String documentPath = documentUserList.get(position).documentPath;
-                    intent.putExtra("document_name", documentName);
-                    intent.putExtra("document_page", documentPage);
-                    intent.putExtra("document_path", documentPath);
+                    Log.d("PageDoc", "Document Page Adapter: "+documentPage);
+                    DocumentUser userDoc = new DocumentUser();
+                    userDoc.id = documentUserList.get(position).id;
+                    userDoc.documentName = documentName;
+                    userDoc.pageNumber   = documentPage;
+                    userDoc.lastNameUser = documentUserList.get(position).lastNameUser;
+                    userDoc.firstNameUSer = documentUserList.get(position).firstNameUSer;
+                    userDoc.emailUser     = userEmail;
+                    userDoc.phoneUser     = userPhone;
+                    userDoc.documentPath  = documentPath;
+                    userDoc.miseEnForme   = miseEnFormeSwitch.isChecked();
+                    userDoc.powerPoint    = powerPointSwitch.isChecked();
+                    userDoc.deliveryDate  = deliveryDates.getText().toString();
+                    intent.putExtra("documentInfo", userDoc);
+
                     context.startActivity(intent);
                 }
             });

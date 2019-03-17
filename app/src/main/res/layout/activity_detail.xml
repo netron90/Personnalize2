@@ -46,7 +46,7 @@
                     android:layout_below="@id/detail_document_name"
                     android:layout_marginTop="16dp"
                     android:gravity="center"
-                    android:text="A remettreavant le"
+                    android:text="A remettre avant le"
                     android:layout_centerHorizontal="true"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                     android:textColor="@color/colorWhite"/>
@@ -69,7 +69,7 @@
                     android:layout_below="@id/detail_delivery_date"
                     android:gravity="center"
                     android:layout_alignParentRight="true"
-                    android:text="29/09/2019"
+                    android:text="30 Pages"
                     android:textAppearance="@style/TextAppearance.AppCompat.Small"
                     android:textColor="@color/colorWhite"
                     android:layout_marginTop="12dp"
@@ -88,12 +88,13 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/bar_total"
                 android:background="@color/colorPrimaryDark"
+                android:padding="8dp"
                 >
                 <RelativeLayout
                     android:id="@+id/first_detail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
+                    android:padding="4dp"
                     >
                     <ImageView
                         android:id="@+id/detail_icon_power_point"
@@ -131,7 +132,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/first_detail"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="8dp"
                     android:padding="8dp"
                     >
                     <ImageView
@@ -321,12 +322,25 @@
 
                 </RelativeLayout>
                 <RelativeLayout
+                    android:id="@+id/end_separator"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/colorLigthBlack"
-                    android:layout_below="@id/bloc_power_point_edition"
+                    android:layout_below="@id/bloc_mise_en_forme_edition"
                     android:layout_marginLeft="16dp"
                     android:layout_marginRight="16dp"></RelativeLayout>
+
+                <Button
+                    android:id="@+id/button_send"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/send_document_button"
+                    android:text="Envoyer le document"
+                    android:textColor="@color/colorWhite"
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/end_separator"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"/>
             </RelativeLayout>
 
         </ScrollView>
