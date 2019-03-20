@@ -6,6 +6,7 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.ActivityChooserView;
 import android.support.v7.widget.RecyclerView;
@@ -166,16 +167,35 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
                 public void onClick(View view) {
                     if(context.getClass().equals(PowerPointForm.class))
                     {
-                        Log.d("CHOOSE IMAGE", "iS CONTEXT");
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.addCategory(Intent.CATEGORY_OPENABLE);
-                        intent.setType("image/*");
-                        PowerPointForm.idDiapositive = diapositiveFormatsList.get(getLayoutPosition()).id;
-                        PowerPointForm.diapositivePosition = getLayoutPosition();
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                        //Log.d("DiapoId", "DiapoId is: " + diapositiveFormatsList.get(getLayoutPosition()).id);
+                        Intent intent;
+                        if(Build.VERSION.SDK_INT < 19)
+                        {
+                            Log.d("CHOOSE IMAGE", "iS CONTEXT");
+                            intent = new Intent(Intent.ACTION_GET_CONTENT);
+                            intent.setType("image/*");
+                            PowerPointForm.idDiapositive = diapositiveFormatsList.get(getLayoutPosition()).id;
+                            PowerPointForm.diapositivePosition = getLayoutPosition();
+                            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                            //Log.d("DiapoId", "DiapoId is: " + diapositiveFormatsList.get(getLayoutPosition()).id);
 
-                        ((PowerPointForm) context).startActivityForResult(Intent.createChooser(intent, "Chose your document"), DIAPOSITIVE_BROWSER);
+                            ((PowerPointForm) context).startActivityForResult(Intent.createChooser(intent, "Chose your document"), DIAPOSITIVE_BROWSER);
+                        }
+                        else
+                        {
+                            Log.d("CHOOSE IMAGE", "iS CONTEXT");
+                            intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                            intent.setType("image/*");
+                            PowerPointForm.idDiapositive = diapositiveFormatsList.get(getLayoutPosition()).id;
+                            PowerPointForm.diapositivePosition = getLayoutPosition();
+                            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                            //Log.d("DiapoId", "DiapoId is: " + diapositiveFormatsList.get(getLayoutPosition()).id);
+
+                            ((PowerPointForm) context).startActivityForResult(Intent.createChooser(intent, "Chose your document"), DIAPOSITIVE_BROWSER);
+
+                        }
+
+
                     }
 //                    new PowerPointForm.selectDiapoImage() {
 //                        @Override

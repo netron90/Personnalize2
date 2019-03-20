@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,9 +34,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.netron90.correction.personnalize.Database.DiapoImagePath;
 import com.netron90.correction.personnalize.Database.DiapositiveFormat;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
@@ -72,20 +84,31 @@ public class DetailActivity extends AppCompatActivity {
 
     public static final String PAYEMENT = "payementMode";
     private final String MONTANT_TOTAL_COMPLEMENT = "montantComplement";
-    private String userName, userEmail, userPhone, userDocPath;
+    private String userName, userEmail, userPhone, userDocPath, userId;
 //    private DeleteDocumentSend deleteDocumentSend;
 
     private SharedPreferences sharedPreferences;
+
+    private List<DiapositiveFormat> diaposDocument = null;
+    private List<List<DiapoImagePath>> imageDiapoPath = null;
 
     private FloatingActionButton fab;
     private AppCompatCheckBox miseEnPage, powerPoint;
     private Switch modePayement;
     private Toolbar toolbar;
     private EditText phoneNumber;
+    private ProgressDialog pd;
     private final int REQUEST_USER_INFO_TEAM = 1;
-    List<DocumentUser> documentUserList = new ArrayList<>();
+    List<DiapositiveFormat> documentDiapoList;
+    List<List<DiapoImagePath>>  diapoImagePath;
     private int montantTotalComplement = 0;
     private final int MONTANT_MISE_EN_PAGE = 2500, MONTANT_POWER_POINT = 10000, MONTANT_NBR_PAGE = 200;
+    private FirebaseStorage storage;
+    private FirebaseFirestore dbFireStore;
+    private List<Task<Uri>> urlDownload = new ArrayList<>();
+
+    private int compteurDiapoDoc = 0;
+    private int compteurDiapoImage = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,10 +140,13 @@ public class DetailActivity extends AppCompatActivity {
         userName = sharedPreferences.getString(MainActivity.USER_NAME, "NoBody");
         userEmail = sharedPreferences.getString(MainActivity.USER_EMAIL, "No Email");
         userPhone = sharedPreferences.getString(MainActivity.USER_PHONE, "No PhoneNumber");
+        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
 
         documentNameTv.setText(userDoc.documentName);
         documentDeliveryDateTv.setText(userDoc.deliveryDate);
         documentPageTv.setText(String.valueOf(userDoc.pageNumber) + " Page(s)");
+        storage = FirebaseStorage.getInstance();
+        dbFireStore      = FirebaseFirestore.getInstance();
 
 
         correctionFauteFactureTv.setText("2000 f CFA");
@@ -151,6 +177,145 @@ public class DetailActivity extends AppCompatActivity {
             miseEnFormeFlagTv.setText("Oui");
             correctionMiseEnFormeFactureTv.setText(String.valueOf(userDoc.pageNumber * 100) + " f CFA");
         }
+
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if(checkConnectionState())
+                {
+                    //TODO: CHECK IF USER PHONE NUMBER IS DEFINE
+                    if(userPhone.equals("No PhoneNumber") || userPhone.equals(""))
+                    {
+                        fileName = "document_api_"+UUID.randomUUID().toString()+".docx";
+                        Log.d("detail activity", "No phone number");
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(view.getContext());
+                        alertDialog.setTitle(R.string.dialog_builder_title_phone);
+                        alertDialog.setMessage(R.string.dialog_builder_message_phone);
+
+                        View v = View.inflate(getApplicationContext(), R.layout.phone_number_dialog, null);
+                        phoneNumber = (EditText)v.findViewById(R.id.phoneNum);
+
+                        alertDialog.setView(v);
+                        alertDialog.setNegativeButton("Annuler", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        });
+
+                        alertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //TODO: SEND DOCUMENT TASK BACKGROUND
+
+
+                                String uploadingMessage = "Wait a moment";
+                                pd = new ProgressDialog(DetailActivity.this);
+                                pd.setTitle("Document uploading");
+                                pd.setMessage(uploadingMessage);
+                                pd.setIndeterminate(false);
+                                pd.show();
+
+                                userPhone = phoneNumber.getText().toString();
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(MainActivity.USER_PHONE, userPhone).commit();
+
+
+                                FirestoreUserDoc firestoreUserDoc = new FirestoreUserDoc();
+
+                                firestoreUserDoc.id = userDoc.id;
+                                firestoreUserDoc.documentName = userDoc.documentName;
+                                firestoreUserDoc.pageNumber = userDoc.pageNumber;
+                                firestoreUserDoc.nameUser = userName;
+                                firestoreUserDoc.emailUser = userEmail;
+                                firestoreUserDoc.phoneUser = userPhone;
+                                firestoreUserDoc.documentPath = userDoc.documentPath;
+                                firestoreUserDoc.powerPoint = userDoc.powerPoint;
+                                firestoreUserDoc.miseEnForme = userDoc.miseEnForme;
+                                firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
+                                firestoreUserDoc.docEnd       = false;
+
+                                dbFireStore.collection("Document").document(userId).set(firestoreUserDoc)
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.d("DOCUMENT SENT", "Document sent failed!");
+
+                                            }
+                                        })
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast.makeText(DetailActivity.this, "Document sent correctly!", Toast.LENGTH_SHORT).show();
+                                                Log.d("DOCUMENT SENT", "Document sent correctly!");
+
+                                                //TODO: GET AND SEND INFO FOR OTHER DOCUMENT INFO TO FIREBASE FIRESTORE
+                                                SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                                sendDocumentTaskBackground.execute();
+
+                                            }
+                                        });
+
+//                                SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+//                                sendDocumentTaskBackground.execute();
+                            }
+                        });
+                        alertDialog.setCancelable(true);
+                        alertDialog.create().show();
+                    }
+                    else
+                    {
+                        String uploadingMessage = "Wait a moment";
+                        pd = new ProgressDialog(DetailActivity.this);
+                        pd.setTitle("Document uploading");
+                        pd.setMessage(uploadingMessage);
+                        pd.setIndeterminate(false);
+                        pd.show();
+//                        SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+//                        sendDocumentTaskBackground.execute();
+
+                        FirestoreUserDoc firestoreUserDoc = new FirestoreUserDoc();
+
+                        firestoreUserDoc.id = userDoc.id;
+                        firestoreUserDoc.documentName = userDoc.documentName;
+                        firestoreUserDoc.pageNumber = userDoc.pageNumber;
+                        firestoreUserDoc.nameUser = userName;
+                        firestoreUserDoc.emailUser = userEmail;
+                        firestoreUserDoc.phoneUser = userPhone;
+                        firestoreUserDoc.documentPath = userDoc.documentPath;
+                        firestoreUserDoc.powerPoint = userDoc.powerPoint;
+                        firestoreUserDoc.miseEnForme = userDoc.miseEnForme;
+                        firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
+                        firestoreUserDoc.docEnd       = false;
+
+                        dbFireStore.collection("Document").document(userId).set(firestoreUserDoc)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d("DOCUMENT SENT", "Document sent failed!");
+
+                                    }
+                                })
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(DetailActivity.this, "Document sent correctly!", Toast.LENGTH_SHORT).show();
+                                        //Log.d("DOCUMENT SENT", "Document sent correctly!");
+                                        SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                        sendDocumentTaskBackground.execute();
+                                    }
+                                });
+                    }
+                }
+                else
+                {
+                    Toast.makeText(DetailActivity.this, "Impossible de se connecter aux serveurs. Vérifier votre connexion internet et réessayer.", Toast.LENGTH_SHORT).show();
+                }
+
+
+            }
+        });
 
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -652,4 +817,303 @@ public class DetailActivity extends AppCompatActivity {
 
         }
     }
+
+    public class SendDocumentTaskBackground extends  AsyncTask<Void, Void, Boolean>
+    {
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "personnalize").build();
+
+            //TODO: GET ALL DIAPOSITIVE OF DOCUMENT
+            documentDiapoList = db.userDao().selectDiapos(userDoc.id);
+            diapoImagePath = new ArrayList<>();
+            for(int i = 0; i < documentDiapoList.size(); i++)
+            {
+//                Log.d("DIAPO DOC", "Diapo Document: taille" + diapoDocument.size());
+//                Log.d("DIAPO DOC", "Diapo Document: Title: " + diapoDocument.get(i).diapoTitle);
+//                Log.d("DIAPO DOC", "Diapo Document: Content: " + diapoDocument.get(i).diapoDesc);
+                //TODO: GET ALL IMAGE DIAPO
+//                diapoImagePath.add()
+                  List<DiapoImagePath> diapoImagePaths = db.userDao().selectDiapoImagePath(documentDiapoList.get(i).id);
+                for(int j = 0; j < diapoImagePaths.size(); j++)
+                {
+                    List<DiapoImagePath> d = db.userDao().selectDiapoImagePath(documentDiapoList.get(i).id);
+                    diapoImagePath.add(d);
+//                    Log.d("DIAPO IMAGE", "Diapo Image: taille" + diapoImagePath.size());
+//                    Log.d("DIAPO IMAGE", "Diapo Image: Image Path: " + diapoImagePath.get(j).imagePath);
+//                    diapoImagePath.add();
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            super.onPostExecute(aBoolean);
+
+
+
+            try
+            {
+                sendDataPerDiapo(compteurDiapoDoc);
+
+            }
+            catch (FileNotFoundException e) {
+                e.printStackTrace();
+                pd.dismiss();
+                Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+            }
+
+
+
+//            for(int i = 0; i < documentDiapoList.size(); i++)
+//            {
+//                posDiapo = i;
+//                if(endResult1[0] == false)
+//                {
+//                    urlDownload = null;
+//                    urlDownload = new ArrayList<>();
+//
+//                    //TODO: GET ALL IMAGE DIAPO
+//                    for(int j = 0; j < diapoImagePath.size(); j++)
+//                    {
+//
+//                        final int pos = j;
+//                        if (endResult1[0] == false)
+//                        {
+//                            Log.d("DIAPO IMAGE", "Diapo Image: taille" + diapoImagePath.size());
+//                            Log.d("DIAPO IMAGE", "Diapo Image: Image Path: " + diapoImagePath.get(j).imagePath);
+//
+//
+//                            Uri uri = Uri.parse(diapoImagePath.get(j).imagePath);
+//                            InputStream stream = null;
+//                            try {
+//
+//                                stream = getContentResolver().openInputStream(uri);
+//
+//                                StorageReference storageRef = storage.getReference();
+//                                StorageReference diapoPlaceImage = storageRef.child("diapo_image");
+//                                UploadTask uploadTask = diapoPlaceImage.putStream(stream);
+//
+//                                final int finalPosDiapo = posDiapo;
+//                                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+//                                    @Override
+//                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+//                                        endResult1[0] = false;
+//                                        Log.d("URL DOWNLOAD", "Url download at position " + pos + " is: " + taskSnapshot.getStorage().getDownloadUrl());
+//                                        urlDownload.add(taskSnapshot.getStorage().getDownloadUrl());
+//
+//                                        FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
+//                                        fireStoreDiapo.diapoTitle = documentDiapoList.get(finalPosDiapo).diapoTitle;
+//                                        fireStoreDiapo.diapoContent = documentDiapoList.get(finalPosDiapo).diapoDesc;
+//                                        fireStoreDiapo.urlDownload = urlDownload;
+//
+//                                        dbFireStore.collection("Document").document(userId).collection("Image_diapo")
+//                                                .document(userId).set(fireStoreDiapo)
+//                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                                    @Override
+//                                                    public void onSuccess(Void aVoid) {
+//                                                        endResult1[0] = false;
+//                                                    }
+//                                                })
+//                                                .addOnFailureListener(new OnFailureListener() {
+//                                                    @Override
+//                                                    public void onFailure(@NonNull Exception e) {
+//                                                        endResult1[0] = true;
+//                                                    }
+//                                                });
+//                                    }
+//                                }).addOnFailureListener(new OnFailureListener() {
+//                                    @Override
+//                                    public void onFailure(@NonNull Exception e) {
+//                                        endResult1[0] = true;
+//                                    }
+//                                });
+//                            } catch (FileNotFoundException e) {
+//                                e.printStackTrace();
+//                                endResult1[0] = true;
+//                            }
+//                        }
+//                        else
+//                        {
+//                            break;
+//                        }
+//
+//                    }
+//
+//
+//                }
+//                else
+//                {
+//                    //Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+//                    break;
+//                }
+//
+//            }
+//            if (endResult1[0] == false)
+//            {
+//                pd.dismiss();
+//                Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+//            }
+//            else {
+//                pd.dismiss();
+//                Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+//            }
+        }
+    }
+
+    private void sendDataPerDiapo(int compteurDiapo) throws FileNotFoundException {
+
+        sendDataPerImage(compteurDiapoImage);
+
+    }
+
+    private void sendDataPerImage(final int positionDiapo) throws FileNotFoundException {
+
+        Log.d("SEND IMAGE", "Image at position: " + positionDiapo);
+        final int position = positionDiapo;
+        final boolean[] endResul = {false};
+        urlDownload = null;
+        urlDownload = new ArrayList<>();
+
+        if(diapoImagePath.get(compteurDiapoDoc).get(position).imagePath.isEmpty())
+        {
+            if(position < diapoImagePath.get(compteurDiapoDoc).size() - 1)
+            {
+                compteurDiapoImage++;
+                try {
+                    sendDataPerImage(compteurDiapoImage);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
+                fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
+                fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
+                fireStoreDiapo.urlDownload = urlDownload;
+                dbFireStore.collection("Document").document(userId)
+                        .collection("DiapoImage").document("diapos")
+                        .set(fireStoreDiapo)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                if(compteurDiapoDoc < documentDiapoList.size() - 1)
+                                {
+                                    compteurDiapoDoc++;
+                                    try {
+                                        sendDataPerDiapo(compteurDiapoDoc);
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                else
+                                {
+                                    pd.dismiss();
+                                    Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                pd.dismiss();
+                                Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+            }
+        }
+        else
+        {
+            Uri uri = Uri.parse(diapoImagePath.get(compteurDiapoDoc).get(position).imagePath);
+            InputStream inputStream = null;
+            inputStream = getContentResolver().openInputStream(uri);
+            StorageReference storageReference = storage.getReference();
+            final StorageReference diapoRef         = storageReference.child("image_diapo/diapo"+String.valueOf(compteurDiapoDoc + 1)+"image"+String.valueOf(compteurDiapoImage + 1)+".jpg");
+            final UploadTask uploadTask = diapoRef.putStream(inputStream);
+
+            final Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                @Override
+                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                    if(!task.isSuccessful())
+                    {
+                        throw  task.getException();
+                    }
+                    Log.d("URL DOWNLOAD", "Url download: " + diapoRef.getDownloadUrl() + " Compteur diapo: " + compteurDiapoDoc + " compteur Image: " + compteurDiapoImage);
+                    urlDownload.add(diapoRef.getDownloadUrl());
+                    Log.d("URL DOWNLOAD", "Url download: "+ urlDownload.get(compteurDiapoImage));
+                    return diapoRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    endResul[0] = true;
+                    if(position < diapoImagePath.get(compteurDiapoDoc).size() - 1)
+                    {
+                        Log.d("URL DOWNLOAD", "Upload Image continue ");
+                        compteurDiapoImage++;
+                        try {
+                            sendDataPerImage(compteurDiapoImage);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else
+                    {
+                        Log.d("URL DOWNLOAD", "Upload Image End!!!");
+                        FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
+
+                        fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
+                        fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
+                        fireStoreDiapo.urlDownload = urlDownload;
+
+                        dbFireStore.collection("Document").document(userId)
+                                .collection("DiapoImage").document(userId)
+                                .set(fireStoreDiapo)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(compteurDiapoDoc < documentDiapoList.size() - 1)
+                                        {
+                                            compteurDiapoDoc++;
+                                            try {
+                                                sendDataPerDiapo(compteurDiapoDoc);
+                                            } catch (FileNotFoundException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            pd.dismiss();
+                                            Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        pd.dismiss();
+                                        Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+
+                    }
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    pd.dismiss();
+                    Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+    }
+
 }

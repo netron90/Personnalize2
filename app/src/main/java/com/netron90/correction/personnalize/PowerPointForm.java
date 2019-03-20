@@ -423,7 +423,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
 
             if(imageUri != null)
             {
-                String imagePath = imageUri.getPath();
+                String imagePath = imageUri.toString();
                 Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
 
                 DiapositiveFormat currentDiapo = db.userDao().selectDiapo(idDiapositive);
@@ -526,7 +526,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uris = item.getUri();
                             imageSelectedUri.add(uris);
-                            String imagePath = imageSelectedUri.get(i).getPath();
+                            String imagePath = imageSelectedUri.get(i).toString();
                             Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
 
                             DiapoImagePath diapoImagePath = new DiapoImagePath();
@@ -577,7 +577,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                             ClipData.Item item = mClipData.getItemAt(i);
                             Uri uris = item.getUri();
                             imageSelectedUri.add(uris);
-                            String imagePath = imageSelectedUri.get(i).getPath();
+                            String imagePath = imageSelectedUri.get(i).toString();
                             Log.d("IMAGE PATH", "Chemin de l'image: "+ imagePath);
 
                             diapoImagePath.idPath = currentDiapo.id;

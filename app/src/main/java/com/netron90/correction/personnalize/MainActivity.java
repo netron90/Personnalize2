@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
     private FirebaseAuth mAuth;
     public static FirebaseUser user;
-    public static final String USER_NAME = "username", USER_PHONE = "user_phone", USER_EMAIL = "user_email";
+    public static final String USER_NAME = "username", USER_PHONE = "user_phone", USER_EMAIL = "user_email",
+    USER_ID = "user_id";
     private SharedPreferences sharedPreferences;
 
     private GoogleSignInClient mGoogleSignInClient;
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void handleFacebookAccessToken(AccessToken accessToken) {
+    private void handleFacebookAccessToken(final AccessToken accessToken) {
         Log.d("FacebookSuccess!!!", "handleFacebookAccessToken:" + accessToken);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
                     editor.putString(USER_NAME, user.getDisplayName()).commit();
                     editor.putString(USER_EMAIL, user.getEmail()).commit();
                     editor.putString(USER_PHONE, user.getPhoneNumber()).commit();
+                    editor.putString(USER_ID, accessToken.getUserId()).commit();
                     Intent intent = new Intent(MainActivity.this, MainProcess.class);
                     finish();
                     startActivity(intent);
@@ -226,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
                             editor.putString(USER_NAME, user.getDisplayName()).commit();
                             editor.putString(USER_EMAIL, user.getEmail()).commit();
                             editor.putString(USER_PHONE, user.getPhoneNumber()).commit();
+                            editor.putString(USER_ID, acct.getId()).commit();
                             Intent intent = new Intent(MainActivity.this, MainProcess.class);
                             finish();
                             startActivity(intent);

@@ -174,30 +174,44 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             iconSend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    position = getLayoutPosition();
-                    Intent intent = new Intent(context, DetailActivity.class);
-                    String documentName = documentUserList.get(position).documentName;
-                    int documentPage = documentUserList.get(position).pageNumber;
+                    if(deliveryDate.getText().equals(""))
+                    {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
+                        builder.setTitle("Date missed");
+                        builder.setMessage("Veuillez selectionner une date.");
+                        builder.setPositiveButton("Ok", null);
+                        builder.create();
+                        builder.show();
+                    }
+                    else
+                    {
+                        position = getLayoutPosition();
+                        Intent intent = new Intent(context, DetailActivity.class);
+                        String documentName = documentUserList.get(position).documentName;
+                        Log.d("PageDoc", "Document Name Adapter: "+documentName);
+                        int documentPage = documentUserList.get(position).pageNumber;
 
-                    String userEmail    = documentUserList.get(position).emailUser;
-                    String userPhone    = documentUserList.get(position).phoneUser;
-                    String documentPath = documentUserList.get(position).documentPath;
-                    Log.d("PageDoc", "Document Page Adapter: "+documentPage);
-                    DocumentUser userDoc = new DocumentUser();
-                    userDoc.id = documentUserList.get(position).id;
-                    userDoc.documentName = documentName;
-                    userDoc.pageNumber   = documentPage;
-                    userDoc.lastNameUser = documentUserList.get(position).lastNameUser;
-                    userDoc.firstNameUSer = documentUserList.get(position).firstNameUSer;
-                    userDoc.emailUser     = userEmail;
-                    userDoc.phoneUser     = userPhone;
-                    userDoc.documentPath  = documentPath;
-                    userDoc.miseEnForme   = miseEnFormeSwitch.isChecked();
-                    userDoc.powerPoint    = powerPointSwitch.isChecked();
-                    userDoc.deliveryDate  = deliveryDates.getText().toString();
-                    intent.putExtra("documentInfo", userDoc);
+                        String userEmail    = documentUserList.get(position).emailUser;
+                        String userPhone    = documentUserList.get(position).phoneUser;
+                        String documentPath = documentUserList.get(position).documentPath;
+                        Log.d("PageDoc", "Document Page Adapter: "+documentPage);
+                        DocumentUser userDoc = new DocumentUser();
+                        userDoc.id = documentUserList.get(position).id;
+                        userDoc.documentName = documentName;
+                        userDoc.pageNumber   = documentPage;
+                        userDoc.lastNameUser = documentUserList.get(position).lastNameUser;
+                        userDoc.firstNameUSer = documentUserList.get(position).firstNameUSer;
+                        userDoc.emailUser     = userEmail;
+                        userDoc.phoneUser     = userPhone;
+                        userDoc.documentPath  = documentPath;
+                        userDoc.miseEnForme   = miseEnFormeSwitch.isChecked();
+                        userDoc.powerPoint    = powerPointSwitch.isChecked();
+                        userDoc.deliveryDate  = deliveryDates.getText().toString();
+                        intent.putExtra("documentInfo", userDoc);
 
-                    context.startActivity(intent);
+                        context.startActivity(intent);
+                    }
+
                 }
             });
 
