@@ -14,15 +14,14 @@ public class FireStoreDiapo {
 
     public String diapoTitle;
     public String diapoContent;
-    public List<Task<Uri>> urlDownload;
 
     public FireStoreDiapo() {
     }
 
-    public FireStoreDiapo(String diapoTitle, String diapoContent, List<Task<Uri>> urlDownload) {
+    public FireStoreDiapo(String diapoTitle, String diapoContent) {
         this.diapoTitle = diapoTitle;
         this.diapoContent = diapoContent;
-        this.urlDownload = urlDownload;
+
     }
 
     public String getDiapoTitle() {
@@ -32,7 +31,7 @@ public class FireStoreDiapo {
         return diapoContent;
     }
 
-    public List<Task<Uri>> getUrlDownload() {
-        return urlDownload;
-    }
+
+
+
 }

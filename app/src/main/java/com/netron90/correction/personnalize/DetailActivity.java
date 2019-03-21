@@ -39,6 +39,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -58,10 +59,13 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -109,6 +113,8 @@ public class DetailActivity extends AppCompatActivity {
 
     private int compteurDiapoDoc = 0;
     private int compteurDiapoImage = 0;
+
+    private String documentFirebaseId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -236,24 +242,25 @@ public class DetailActivity extends AppCompatActivity {
                                 firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                                 firestoreUserDoc.docEnd       = false;
 
-                                dbFireStore.collection("Document").document(userId).set(firestoreUserDoc)
+                                dbFireStore.collection("Document").add(firestoreUserDoc).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+                                        if (userDoc.powerPoint == true)
+                                        {
+                                            documentFirebaseId = documentReference.getId();
+                                            SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                            sendDocumentTaskBackground.execute();
+                                        }
+                                        else{
+                                            //TODO: SEND DOCUMENT TO WBB APPS
+                                        }
+                                    }
+                                })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(DetailActivity.this, "Le serveur ne répond pas. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
                                                 Log.d("DOCUMENT SENT", "Document sent failed!");
-
-                                            }
-                                        })
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Toast.makeText(DetailActivity.this, "Document sent correctly!", Toast.LENGTH_SHORT).show();
-                                                Log.d("DOCUMENT SENT", "Document sent correctly!");
-
-                                                //TODO: GET AND SEND INFO FOR OTHER DOCUMENT INFO TO FIREBASE FIRESTORE
-                                                SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
-                                                sendDocumentTaskBackground.execute();
-
                                             }
                                         });
 
@@ -289,23 +296,44 @@ public class DetailActivity extends AppCompatActivity {
                         firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                         firestoreUserDoc.docEnd       = false;
 
-                        dbFireStore.collection("Document").document(userId).set(firestoreUserDoc)
+                        dbFireStore.collection("Document").add(firestoreUserDoc)
+                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+                                        if (userDoc.powerPoint == true)
+                                        {
+                                            documentFirebaseId = documentReference.getId();
+                                            SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                            sendDocumentTaskBackground.execute();
+                                        }
+                                        else{
+                                            //TODO: SEND DOCUMENT TO WBB APPS
+                                        }
+                                    }
+                                })
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(DetailActivity.this, "Le serveur ne répond pas. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
                                         Log.d("DOCUMENT SENT", "Document sent failed!");
-
-                                    }
-                                })
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(DetailActivity.this, "Document sent correctly!", Toast.LENGTH_SHORT).show();
-                                        //Log.d("DOCUMENT SENT", "Document sent correctly!");
-                                        SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
-                                        sendDocumentTaskBackground.execute();
                                     }
                                 });
+//                                .addOnFailureListener(new OnFailureListener() {
+//                                    @Override
+//                                    public void onFailure(@NonNull Exception e) {
+//                                        Log.d("DOCUMENT SENT", "Document sent failed!");
+//
+//                                    }
+//                                })
+//                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                    @Override
+//                                    public void onSuccess(Void aVoid) {
+//                                        Toast.makeText(DetailActivity.this, "Document sent correctly!", Toast.LENGTH_SHORT).show();
+//                                        //Log.d("DOCUMENT SENT", "Document sent correctly!");
+//                                        SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+//                                        sendDocumentTaskBackground.execute();
+//                                    }
+//                                });
                     }
                 }
                 else
@@ -606,57 +634,57 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
-//    public class DeleteDocumentSend extends AsyncTask<Void, Void, Void>
-//    {
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-//                    PersonnalizeDatabase.class, "scodelux").build();
-//            db.userDao().deleteOneDocument(documentNameTV.getText().toString());
-//
-//            documentUserList = db.userDao().selectAllDocument();
-//            //)remove element from arrayList of User documents
-//            //documentUserList.remove(position);
-//            if(documentUserList.size() == 0)
+    public class DeleteDocumentSend extends AsyncTask<Void, Void, Void>
+    {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "scodelux").build();
+            db.userDao().deleteOneDocument(documentNameTv.getText().toString());
+
+            List<DocumentUser> documentUserList = db.userDao().selectAllDocument();
+            //)remove element from arrayList of User documents
+            //documentUserList.remove(position);
+            if(documentUserList.size() == 0)
+            {
+
+                SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
+                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
+                //return true;
+            }
+            else
+            {
+                //documentUserList.remove(position);
+                //return false;
+            }
+           return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+//            if(aVoid == true)
 //            {
-//
-//                SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
-//                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
-//                //return true;
+//                Log.d("DetaiActivity Size Tab", "Element restants: " +  documentUserList.size());
+//                Intent mainProcessActivityIntent = new Intent (DetailActivity.this, MainProcess.class);
+//                mainProcessActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                finish();
+//                startActivity(mainProcessActivityIntent);
 //            }
-//            else
-//            {
-//                //documentUserList.remove(position);
-//                //return false;
+//            else {
+//                Log.d("DetaiActivity Size Tab", "Element restants: " +  documentUserList.size());
+//                Intent mainProcessActivityIntent = new Intent (DetailActivity.this, MainProcess.class);
+//                mainProcessActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                finish();
+//                startActivity(mainProcessActivityIntent);
 //            }
-//           return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            super.onPostExecute(aVoid);
-////            if(aVoid == true)
-////            {
-////                Log.d("DetaiActivity Size Tab", "Element restants: " +  documentUserList.size());
-////                Intent mainProcessActivityIntent = new Intent (DetailActivity.this, MainProcess.class);
-////                mainProcessActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-////                finish();
-////                startActivity(mainProcessActivityIntent);
-////            }
-////            else {
-////                Log.d("DetaiActivity Size Tab", "Element restants: " +  documentUserList.size());
-////                Intent mainProcessActivityIntent = new Intent (DetailActivity.this, MainProcess.class);
-////                mainProcessActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-////                finish();
-////                startActivity(mainProcessActivityIntent);
-////            }
-//            Intent intent = new Intent(DetailActivity.this, MainProcess.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-//            finish();
-//        }
-//    }
+            Intent intent = new Intent(DetailActivity.this, MainProcess.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        }
+    }
 
 //    @Override
 //    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -863,6 +891,8 @@ public class DetailActivity extends AppCompatActivity {
             }
             catch (FileNotFoundException e) {
                 e.printStackTrace();
+                compteurDiapoImage = 0;
+                compteurDiapoDoc = 0;
                 pd.dismiss();
                 Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
             }
@@ -973,48 +1003,46 @@ public class DetailActivity extends AppCompatActivity {
 
     private void sendDataPerImage(final int positionDiapo) throws FileNotFoundException {
 
-        Log.d("SEND IMAGE", "Image at position: " + positionDiapo);
+        Log.d("SEND IMAGE", "Image at position: " + compteurDiapoDoc + " compteur image Path: " + compteurDiapoImage);
+        Log.d("SEND IMAGE", "Image diapos path: " + diapoImagePath.get(compteurDiapoDoc).size());
         final int position = positionDiapo;
         final boolean[] endResul = {false};
-        urlDownload = null;
-        urlDownload = new ArrayList<>();
+//        urlDownload = new ArrayList<>();
 
-        if(diapoImagePath.get(compteurDiapoDoc).get(position).imagePath.isEmpty())
-        {
-            if(position < diapoImagePath.get(compteurDiapoDoc).size() - 1)
-            {
+        if (documentDiapoList.get(compteurDiapoDoc).nbrImage == 0) {
+            urlDownload.add(null);
+            if (position < diapoImagePath.get(compteurDiapoDoc).size() - 1) {
                 compteurDiapoImage++;
                 try {
                     sendDataPerImage(compteurDiapoImage);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-            }
-            else
-            {
-                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
-                fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
-                fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
-                fireStoreDiapo.urlDownload = urlDownload;
-                dbFireStore.collection("Document").document(userId)
-                        .collection("DiapoImage").document("diapos")
-                        .set(fireStoreDiapo)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+            } else {
+
+                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc);
+
+//                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
+//                fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
+//                fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
+//                fireStoreDiapo.urlDownload = urlDownload;
+                dbFireStore.collection("Document").document(documentFirebaseId)
+                        .collection("Diapositive").add(fireStoreDiapo)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
-                            public void onSuccess(Void aVoid) {
-                                if(compteurDiapoDoc < documentDiapoList.size() - 1)
-                                {
+                            public void onSuccess(DocumentReference documentReference) {
+                                if (compteurDiapoDoc < documentDiapoList.size() - 1) {
                                     compteurDiapoDoc++;
                                     try {
                                         sendDataPerDiapo(compteurDiapoDoc);
                                     } catch (FileNotFoundException e) {
                                         e.printStackTrace();
                                     }
-                                }
-                                else
-                                {
+                                } else {
                                     pd.dismiss();
                                     Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                    DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                                    deleteDocumentSend.execute();
                                 }
                             }
                         })
@@ -1023,97 +1051,95 @@ public class DetailActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 pd.dismiss();
                                 Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+                                compteurDiapoDoc = 0;
+                                compteurDiapoImage = 0;
                             }
                         });
 
             }
-        }
-        else
+        } else
         {
             Uri uri = Uri.parse(diapoImagePath.get(compteurDiapoDoc).get(position).imagePath);
-            InputStream inputStream = null;
-            inputStream = getContentResolver().openInputStream(uri);
-            StorageReference storageReference = storage.getReference();
-            final StorageReference diapoRef         = storageReference.child("image_diapo/diapo"+String.valueOf(compteurDiapoDoc + 1)+"image"+String.valueOf(compteurDiapoImage + 1)+".jpg");
-            final UploadTask uploadTask = diapoRef.putStream(inputStream);
+        InputStream inputStream = null;
+        inputStream = getContentResolver().openInputStream(uri);
+        StorageReference storageReference = storage.getReference();
+        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + String.valueOf(compteurDiapoDoc + 1) + "image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
+        final UploadTask uploadTask = diapoRef.putStream(inputStream);
 
-            final Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if(!task.isSuccessful())
-                    {
-                        throw  task.getException();
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                //urlDownload.add(taskSnapshot.getStorage().getDownloadUrl());
+                Log.d("URL DOWNLOAD", "URL Download: " + urlDownload);
+                endResul[0] = true;
+                if (position < diapoImagePath.get(compteurDiapoDoc).size() - 1) {
+                    Log.d("URL DOWNLOAD", "Upload Image continue ");
+                    compteurDiapoImage++;
+                    try {
+                        sendDataPerImage(compteurDiapoImage);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
                     }
-                    Log.d("URL DOWNLOAD", "Url download: " + diapoRef.getDownloadUrl() + " Compteur diapo: " + compteurDiapoDoc + " compteur Image: " + compteurDiapoImage);
-                    urlDownload.add(diapoRef.getDownloadUrl());
-                    Log.d("URL DOWNLOAD", "Url download: "+ urlDownload.get(compteurDiapoImage));
-                    return diapoRef.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    endResul[0] = true;
-                    if(position < diapoImagePath.get(compteurDiapoDoc).size() - 1)
-                    {
-                        Log.d("URL DOWNLOAD", "Upload Image continue ");
-                        compteurDiapoImage++;
-                        try {
-                            sendDataPerImage(compteurDiapoImage);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
+                } else {
+                    Log.d("URL DOWNLOAD", "Upload Image End!!!");
+
+                    FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc);
+
+//                        fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
+//                        fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
+//                        fireStoreDiapo.urlDownload = urlDownload;
+
+                    //dbFireStore.collection("Document").document(documentFirebaseId).collection("DiapoImage").add(fireStoreDiapo)
+                    CollectionReference document = dbFireStore.collection("Document");
+                    DocumentReference docUserSaved = document.document(documentFirebaseId);
+                    CollectionReference diapoCollection = docUserSaved.collection("Diapositive");
+                    diapoCollection.add(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            if (compteurDiapoDoc < documentDiapoList.size() - 1) {
+                                compteurDiapoDoc++;
+                                try {
+                                    sendDataPerDiapo(compteurDiapoDoc);
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                            } else {
+                                pd.dismiss();
+                                Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                                deleteDocumentSend.execute();
+                            }
                         }
-                    }
-                    else
-                    {
-                        Log.d("URL DOWNLOAD", "Upload Image End!!!");
-                        FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    compteurDiapoImage = 0;
+                                    compteurDiapoDoc = 0;
+                                    pd.dismiss();
+                                    Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
 
-                        fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
-                        fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
-                        fireStoreDiapo.urlDownload = urlDownload;
-
-                        dbFireStore.collection("Document").document(userId)
-                                .collection("DiapoImage").document(userId)
-                                .set(fireStoreDiapo)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(compteurDiapoDoc < documentDiapoList.size() - 1)
-                                        {
-                                            compteurDiapoDoc++;
-                                            try {
-                                                sendDataPerDiapo(compteurDiapoDoc);
-                                            } catch (FileNotFoundException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                        else
-                                        {
-                                            pd.dismiss();
-                                            Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        pd.dismiss();
-                                        Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-
-                    }
+                                }
+                            });
 
                 }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    pd.dismiss();
-                    Toast.makeText(DetailActivity.this, "Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
-                }
-            });
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        pd.dismiss();
+                        compteurDiapoImage = 0;
+                        compteurDiapoDoc = 0;
+                        Log.d("CLOUD STORAGE", "Firebase Cloud storage Image. Impossible d'établir une connexion avec le serveur. Réessayer plus tard.");
+                        Toast.makeText(DetailActivity.this, "Firebase Cloud storage Image. Impossible d'établir une connexion avec le serveur. Réessayer plus tard.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
         }
 
     }
 
 }
+
+//iPgi8GrwAoNHyYveiEi3
