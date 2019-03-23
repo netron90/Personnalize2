@@ -295,6 +295,7 @@ public class DetailActivity extends AppCompatActivity {
                         firestoreUserDoc.miseEnForme = userDoc.miseEnForme;
                         firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                         firestoreUserDoc.docEnd       = false;
+                        firestoreUserDoc.documentPaid = false;
 
                         dbFireStore.collection("Document").add(firestoreUserDoc)
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -641,7 +642,7 @@ public class DetailActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
                     PersonnalizeDatabase.class, "scodelux").build();
-            db.userDao().deleteOneDocument(documentNameTv.getText().toString());
+            db.userDao().deleteOneDocument(userDoc.id);
 
             List<DocumentUser> documentUserList = db.userDao().selectAllDocument();
             //)remove element from arrayList of User documents
@@ -1004,31 +1005,34 @@ public class DetailActivity extends AppCompatActivity {
     private void sendDataPerImage(final int positionDiapo) throws FileNotFoundException {
 
         Log.d("SEND IMAGE", "Image at position: " + compteurDiapoDoc + " compteur image Path: " + compteurDiapoImage);
-        Log.d("SEND IMAGE", "Image diapos path: " + diapoImagePath.get(compteurDiapoDoc).size());
+//        Log.d("SEND IMAGE", "Image diapos path: " + diapoImagePath.get(compteurDiapoDoc).size());
         final int position = positionDiapo;
         final boolean[] endResul = {false};
 //        urlDownload = new ArrayList<>();
 
         if (documentDiapoList.get(compteurDiapoDoc).nbrImage == 0) {
             urlDownload.add(null);
-            if (position < diapoImagePath.get(compteurDiapoDoc).size() - 1) {
-                compteurDiapoImage++;
-                try {
-                    sendDataPerImage(compteurDiapoImage);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            } else {
-
+            Log.d("SEND IMAGE", "Pas d'image");
+//            Log.d("SEND IMAGE", "Pas d'image. Position: " + position + " Reste: " + diapoImagePath.get(compteurDiapoDoc).size());
+//            if (position < diapoImagePath.get(compteurDiapoDoc).size() - 1) {
+//                compteurDiapoImage++;
+//                try {
+//                    sendDataPerImage(compteurDiapoImage);
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//            } else {
+                Log.d("SEND IMAGE", "Plus de diapo.Save collection Diapositive");
                 FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc);
 
 //                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
 //                fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
 //                fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
 //                fireStoreDiapo.urlDownload = urlDownload;
-                dbFireStore.collection("Document").document(documentFirebaseId)
-                        .collection("Diapositive").add(fireStoreDiapo)
-                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                CollectionReference document = dbFireStore.collection("Document");
+                DocumentReference docUserSaved = document.document(documentFirebaseId);
+                CollectionReference diapoCollection = docUserSaved.collection("Diapositive");
+                diapoCollection.add(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
                                 if (compteurDiapoDoc < documentDiapoList.size() - 1) {
@@ -1056,7 +1060,7 @@ public class DetailActivity extends AppCompatActivity {
                             }
                         });
 
-            }
+            //}
         } else
         {
             Uri uri = Uri.parse(diapoImagePath.get(compteurDiapoDoc).get(position).imagePath);

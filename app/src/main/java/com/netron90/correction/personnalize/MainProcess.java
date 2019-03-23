@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.aspose.words.Document;
@@ -41,7 +42,8 @@ import java.util.List;
 
 public class MainProcess extends AppCompatActivity implements MemoireFragmentEmpty.OnFragmentInteractionListener,
         DiscussionFragment.OnFragmentInteractionListener, MemoireFragment.OnFragmentInteractionListener,
-RootFragment.OnFragmentInteractionListener{
+RootFragment.OnFragmentInteractionListener, RootDiscussionFragment.OnFragmentInteractionListener,
+DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
     private Toolbar toolbar;
     private TabLayout tabLayout;
@@ -52,10 +54,11 @@ RootFragment.OnFragmentInteractionListener{
     private String path, fileName;
     private Uri uriFile;
     private FileSearchData fileSearchData;
+    public static TextView newDocumentServer;
     private FileSearchDataSecond fileSearchDataSecond;
     private LoadData loadData;
     public static SharedPreferences sharedPreferences;
-    public final static String DOCUMENT_EXIST = "documentExist";
+    public final static String DOCUMENT_EXIST = "documentExist", DOCUMENT_AVAILABLE = "documentAvailable";
     public static List<DocumentUser> documentUserQuery = null;
     public static FragmentManager fragmentManager = null;
     public static android.app.FragmentManager fragmentManagerDatePicker = null;
@@ -68,6 +71,7 @@ RootFragment.OnFragmentInteractionListener{
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
+        newDocumentServer = (TextView) findViewById(R.id.new_document_server);
 //        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 //        navigationView = (NavigationView) findViewById(R.id.navigation_view);
         fragmentManager = getSupportFragmentManager();
@@ -97,12 +101,36 @@ RootFragment.OnFragmentInteractionListener{
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         Boolean emptyFragment = sharedPreferences.getBoolean(DOCUMENT_EXIST, false);
+        Boolean docAvailable = sharedPreferences.getBoolean(DOCUMENT_AVAILABLE, false);
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if(tab.getText().equals("DISCUSSION"))
+                {
+                    if(newDocumentServer.getVisibility() == View.VISIBLE )
+                    {
+                        newDocumentServer.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
 
         if(emptyFragment == false)
         {
             TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
             tabAdapter.addFragment(new RootFragment(), "MEMOIRES");
-            tabAdapter.addFragment(new DiscussionFragment(), "DISCUSSION");
+            tabAdapter.addFragment(new RootDiscussionFragment(), "DISCUSSION");
             viewPager.setAdapter(tabAdapter);
             tabLayout.setupWithViewPager(viewPager);
         }
@@ -111,6 +139,8 @@ RootFragment.OnFragmentInteractionListener{
             //TODO: Load database
             loadData = new LoadData();
             loadData.execute();
+            Log.d("LOAD DATA", "Je suis charger!!!");
+
         }
 
 
@@ -386,7 +416,7 @@ RootFragment.OnFragmentInteractionListener{
 
             TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
             tabAdapter.addFragment(new MemoireFragment(), "MEMOIRES");
-            tabAdapter.addFragment(new DiscussionFragment(), "DISCUSSION");
+            tabAdapter.addFragment(new RootDiscussionFragment(), "DISCUSSION");
             viewPager.setAdapter(tabAdapter);
             tabLayout.setupWithViewPager(viewPager);
 

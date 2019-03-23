@@ -3,7 +3,8 @@
     <string name="app_name_uppercase">PERSONNALIZE</string>
     <string name="btn_facebook_signin">Connect with Facebook</string>
     <string name="btn_gmail_signin">Connect with Gmail</string>
-    <string name="no_file_selected">No file selected. Try to pick a file.</string>
+    <string name="no_file_selected">Aucun fichier selectionné. Veuillez chosir un fichier.</string>
+    <string name="no_document_avalaible">Aucun document disponible sur le serveur.</string>
     <string name="dialog_builder_title">Delete document</string>
     <string name="dialog_builder_message">Do you really want delete this document ?</string>
     <string name="dialog_builder_title_phone">Your phone number</string>
@@ -35,6 +36,13 @@
     <string name="detail_activity_correction_orthographe_text">Correction fautes d\'orthographe</string>
     <string name="detail_activity_power_point_edition_text">Edition du Power Point du document</string>
     <string name="detail_activity_mise_en_forme_text">Mise en forme du document</string>
+    <string name="discussion_doc_not_ready">Votre document n\'est pas encore prêt.</string>
+    <string name="discussion_doc_ready">Votre document est prêt.</string>
+    <string name="discussion_doc_not_paid">Vous n\'avez pas encore finalisé votre payement</string>
+    <string name="discussion_doc_paid">Vous avez finalisé votre payement pour ce document</string>
+
+    <string name="discussion_send_doc_paid_ready_false">Vous devez d\'abord finaliser le payement de votre document</string>
+    <string name="discussion_send_doc_paid_true_ready_false">Veuillez patienter... Votre document n\'est pas encore prêt</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

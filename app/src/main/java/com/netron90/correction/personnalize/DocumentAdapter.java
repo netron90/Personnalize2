@@ -271,7 +271,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
 //            }
 
             //2) Delete one document from database
-            db.userDao().deleteOneDocument(documentUserList.get(position).documentName);
+            db.userDao().deleteOneDocument(documentUserList.get(position).id);
             documentUserList.clear();
             //3)select all document
             List<DocumentUser> documentSelect = db.userDao().selectAllDocument();

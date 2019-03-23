@@ -32,6 +32,8 @@
                 android:layout_height="wrap_content"
                 android:text="MEMOIRE"
                 />
+
+
         </android.support.design.widget.TabLayout>
 
         <android.support.v4.view.ViewPager
@@ -41,5 +43,20 @@
             android:layout_below="@id/tabLayout">
 
         </android.support.v4.view.ViewPager>
+    <TextView
+        android:id="@+id/new_document_server"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/item_count"
+        android:text="1"
+        android:layout_alignParentRight="true"
+        android:textColor="@color/colorWhite"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_alignTop="@id/tabLayout"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        />
 
 </RelativeLayout>

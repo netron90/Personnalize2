@@ -1,0 +1,158 @@
+package com.netron90.correction.personnalize;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.netron90.correction.personnalize.Database.DocumentAvailable;
+
+import java.util.List;
+
+/**
+ * Created by CHRISTIAN on 23/03/2019.
+ */
+
+public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<DiscussionDocAvailableAdapter.ViewHolder> {
+
+    public static List<DocumentAvailable> listDocAvailable;
+    private Context context;
+
+    public DiscussionDocAvailableAdapter(List<DocumentAvailable> docAvailable) {
+        this.listDocAvailable = docAvailable;
+    }
+
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.document_available_model, null, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+
+        holder.documentName.setText(listDocAvailable.get(position).documentName);
+        holder.documentPage.setText(String.valueOf(listDocAvailable.get(position).pageNumber) + " Pages");
+        holder.deliveryDates.setText(listDocAvailable.get(position).deliveryDate);
+        if(listDocAvailable.get(position).miseEnForme == true)
+        {
+            holder.miseEnFormeSwitch.setText("Oui");
+            holder.miseEnFormeSwitch.setEnabled(false);
+        }
+        else{
+            holder.miseEnFormeSwitch.setText("Non");
+            holder.miseEnFormeSwitch.setEnabled(false);
+        }
+        if(listDocAvailable.get(position).powerPoint == true)
+        {
+            holder.powerPointSwitch.setText("Oui");
+            holder.powerPointSwitch.setEnabled(false);
+        }
+        else{
+            holder.powerPointSwitch.setText("Non");
+            holder.powerPointSwitch.setEnabled(false);
+        }
+
+    }
+
+    @Override
+    public int getItemCount()
+    {
+        if(listDocAvailable == null)
+        {
+            return 0;
+        }
+        else {
+            return listDocAvailable.size();
+        }
+
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView documentName, documentPage, deliveryDates, powerPointSwitch, miseEnFormeSwitch;
+        ImageView iconDocReady, iconDocPaid;
+
+        private RelativeLayout docReady, docPaidLayout, startDiscussion, deleteBlock;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            context            = itemView.getContext();
+            documentName       = (TextView) itemView.findViewById(R.id.document_name);
+            documentPage       = (TextView) itemView.findViewById(R.id.document_pages);
+            powerPointSwitch   = (TextView) itemView.findViewById(R.id.switch_power_point_option);
+            miseEnFormeSwitch  = (TextView) itemView.findViewById(R.id.switch_mise_en_forme_option);
+            deliveryDates      = (TextView) itemView.findViewById(R.id.text_date);
+
+            iconDocReady       = (ImageView) itemView.findViewById(R.id.icon_doc_ready);
+            iconDocPaid        = (ImageView) itemView.findViewById(R.id.icon_doc_paid);
+            docReady           = (RelativeLayout) itemView.findViewById(R.id.doc_ready_layout);
+            docPaidLayout      = (RelativeLayout) itemView.findViewById(R.id.doc_paid_layout);
+
+            deleteBlock        = (RelativeLayout) itemView.findViewById(R.id.block_delete_doc);
+
+            startDiscussion    = (RelativeLayout) itemView.findViewById(R.id.start_discussion);
+
+            docReady.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(listDocAvailable.get(getLayoutPosition()).docEnd == false)
+                    {
+                        Toast.makeText(context, "discussion_doc_not_ready", Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(context, "discussion_doc_ready", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            docPaidLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(listDocAvailable.get(getLayoutPosition()).documentPaid == false)
+                    {
+                        Toast.makeText(context, R.string.discussion_doc_not_paid, Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(context, R.string.discussion_doc_paid, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            startDiscussion.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if((listDocAvailable.get(getLayoutPosition()).documentPaid == false &&
+                            listDocAvailable.get(getLayoutPosition()).docEnd== false) ||
+                            (listDocAvailable.get(getLayoutPosition()).documentPaid == false &&
+                                    listDocAvailable.get(getLayoutPosition()).docEnd== true) )
+                    {
+
+                        Toast.makeText(context, R.string.discussion_send_doc_paid_ready_false, Toast.LENGTH_SHORT).show();
+                    }
+                    else if(listDocAvailable.get(getLayoutPosition()).documentPaid == true &&
+                            listDocAvailable.get(getLayoutPosition()).docEnd== false)
+                    {
+                        Toast.makeText(context, R.string.discussion_send_doc_paid_true_ready_false, Toast.LENGTH_SHORT).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(context, "PARTIE CHAT DISPONIBLE", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+}

@@ -24,8 +24,12 @@ public interface UserDao {
     public DocumentUser selectDocument(int position);
 
     //DELETE SPECIFIC ELEMENT INTO DATABASE
-    @Query("DELETE FROM document_user WHERE document_info = :name")
-    public void deleteOneDocument(String name);
+    @Query("DELETE FROM document_user WHERE id = :id_document")
+    public void deleteOneDocument(int id_document);
+
+//    //DELETE SPECIFIC ELEMENT INTO DATABASE
+//    @Query("DELETE FROM document_user WHERE id = :id_document")
+//    public void deleteOneDocumentWithId(int id_document);
 
     //Update power point
     @Query("UPDATE document_user SET power_point = :power_point_value WHERE id= :id")
@@ -82,4 +86,10 @@ public interface UserDao {
     //Delete all DiapoImagePath Object
     @Query("DELETE FROM diapo_image_path WHERE id_path = :id_path")
     public void deleteDiapoImagePath(int id_path);
+
+    @Insert
+    public void insertNewDocAvailable(DocumentAvailable documentAvailable);
+
+    @Query("SELECT * FROM document_available")
+    public List<DocumentAvailable> selectListDocAvailable ();
 }
