@@ -3,8 +3,11 @@ package com.netron90.correction.personnalize;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,7 +19,9 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -28,6 +33,7 @@ import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -54,17 +60,17 @@ public class DiscussionFragment extends Fragment {
     private DocumentReference documentReference;
     private SharedPreferences sharedPreferences;
     private ListenerRegistration registration;
-    private DocumentAvailable document = null;
     private Context context;
-    private InsertNewDocAvailable insertNewDocAvailable;
-    private InsertNewDocAvailableNew insertNewDocAvailableNew;
     private RelativeLayout fileImage;
     private TextView textNothing;
     private RecyclerView recyclerView;
     private DiscussionDocAvailableAdapter docAdapter;
     private DocumentAvailable newDocumentGet;
-    private GetAvailableDocument getAvailableDocument;
-    List<DocumentAvailable> documentAvailables= new ArrayList<>();
+    List<DocumentAvailable> documentAvail = new ArrayList<>();
+    private boolean onCreateFlag = false;
+    private String userId = "";
+    private int firstCallBack = 1;
+    private boolean docAvailableFla = false;
 
     private OnFragmentInteractionListener mListener;
 
@@ -105,103 +111,191 @@ public class DiscussionFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_discussion, container, false);
         context = container.getContext();
+        Log.d("FRAGMENT START", "Le fragment est lance");
 
         fileImage   = view.findViewById(R.id.file_empty);
         textNothing = view.findViewById(R.id.text_nothing);
         recyclerView = view.findViewById(R.id.docAvailableRecyclerView);
-
-        boolean docAvailable = MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false);
-        if(docAvailable == false)
-        {
-            //TODO: KEEP FRAGMENT FILE EMPTY ON INTERFACE
-
-            dbFireStore  = FirebaseFirestore.getInstance();
-            registration = dbFireStore.collection("Document")
-                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                        @Override
-                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-
-                            if(e != null)
-                            {
-                                Log.d("LISTENE UPDATE", "Listen failed. ", e);
-                                return;
-                            }
-
-                            if(value.isEmpty())
-                            {}
-                            else
-                            {
-                                //TODO: GET NEW DOCUMENT
-                                for(QueryDocumentSnapshot doc : value)
-                                {
-                                    Log.d("VALUE SNAPCHAT", "Document firebase: " + doc);
-                                    DocumentAvailable document = new DocumentAvailable();
-
-                                    if(doc.get("id") != null)
-                                    {
-                                        document.idServer = (Long) doc.get("id");
-                                    }
-
-                                    if(doc.get("documentName") != null)
-                                    {
-                                        document.documentName = doc.getString("documentName");
-                                    }
-                                    if(doc.get("pageNumber") != null)
-                                    {
-                                        document.pageNumber = (Long) doc.get("pageNumber");
-                                    }
-
-                                    if(doc.get("powerPoint") != null)
-                                    {
-                                        document.powerPoint = (boolean) doc.get("powerPoint");
-                                    }
-                                    if(doc.get("miseEnForme") != null)
-                                    {
-                                        document.miseEnForme = (boolean) doc.get("miseEnForme");
-                                    }
-                                    if(doc.get("documentName") != null)
-                                    {
-                                        document.deliveryDate = doc.getString("deliveryDate");
-                                    }
-                                    if(doc.get("docEnd") != null)
-                                    {
-                                        document.docEnd = (boolean) doc.get("docEnd");
-                                    }
-                                    if(doc.get("docPaid") != null)
-                                    {
-                                        document.documentPaid = (boolean) doc.get("docPaid");
-                                    }
-
-                                    documentAvailables.add(document);
-                                }
-
-                                insertNewDocAvailable = new InsertNewDocAvailable();
-                                insertNewDocAvailable.execute();
-
-                            }
-
-                        }
-                    });
-        }
-        else
-        {
-            fileImage.setVisibility(View.GONE);
-            textNothing.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+        dbFireStore = FirebaseFirestore.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
 
 
-
-            dbFireStore  = FirebaseFirestore.getInstance();
-            getAvailableDocument = new GetAvailableDocument();
-            getAvailableDocument.execute();
-        }
-
-        //final boolean documentAvailableFlag = MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false);
-
-
+        docAvailableFla = MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false);
+        onCreateFlag = true;
+        //createListener();
         return view;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        registration.remove();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+//        GetDatabase getDatabase = new GetDatabase();
+//        getDatabase.execute();
+//        if(onCreateFlag == true){}
+//        else{
+//
+//        }
+        createListener();
+    }
+
+    private boolean isOnline()
+    {
+        boolean isConnected = false;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        if(networkInfo != null && networkInfo.isConnected())
+        {
+            isConnected = true;
+        }
+        else
+        {
+            isConnected = false;
+        }
+        return isConnected;
+    }
+    private void getRealTimeDocument(QueryDocumentSnapshot doc)
+    {
+        if(doc.get("documentName") != null)
+        {
+            newDocumentGet.documentName = doc.getString("documentName");
+        }
+
+        if(doc.get("pageNumber") != null)
+        {
+            newDocumentGet.pageNumber =(long) doc.get("pageNumber");
+        }
+
+        if(doc.get("nameUser") != null)
+        {
+            newDocumentGet.nameUser = doc.getString("nameUser");
+        }
+
+        if(doc.get("emailUser") != null)
+        {
+            newDocumentGet.emailUser = doc.getString("emailUser");
+        }
+
+        if(doc.get("phoneUser") != null)
+        {
+            newDocumentGet.phoneUser = doc.getString("phoneUser");
+        }
+
+        if(doc.get("documentPath") != null)
+        {
+            newDocumentGet.documentPath = doc.getString("documentPath");
+        }
+
+        if(doc.get("powerPoint") != null)
+        {
+            newDocumentGet.powerPoint = (boolean) doc.get("powerPoint");
+        }
+
+        if(doc.get("miseEnForme") != null)
+        {
+            newDocumentGet.miseEnForme = (boolean) doc.get("miseEnForme");
+        }
+
+        if(doc.get("docEnd") != null)
+        {
+            newDocumentGet.docEnd = (boolean) doc.get("docEnd");
+        }
+
+        if(doc.get("documentPaid") != null)
+        {
+            newDocumentGet.documentPaid = (boolean) doc.get("documentPaid");
+        }
+
+        if(doc.get("deliveryDate") != null)
+        {
+            newDocumentGet.deliveryDate = doc.getString("deliveryDate");
+        }
+
+        if(doc.get("userId") != null)
+        {
+            newDocumentGet.userId = doc.getString("userId");
+        }
+    }
+
+    private void createListener()
+    {
+        registration = dbFireStore.collection("Document")
+                .whereEqualTo("userId", userId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+
+                        if(e != null)
+                        {
+                            return;
+                        }
+
+                        //TODO: CHECK IF USER IS ONLINE
+                        if(isOnline())
+                        {
+                            //TODO: CHECK IF ADAPTER IS NULL
+                            if(docAdapter == null)
+                            {
+                                //TODO:GET DATA FROM SERVER
+                                int compteur = 0;
+                                documentAvail = new ArrayList<>();
+                                newDocumentGet = new DocumentAvailable();
+                                if(snapshots.isEmpty())
+                                {
+                                    fileImage.setVisibility(View.VISIBLE);
+                                    textNothing.setVisibility(View.VISIBLE);
+                                    recyclerView.setVisibility(View.GONE);
+                                }
+                                else
+                                {
+                                    documentAvail = new ArrayList<>();
+                                    int i = 0;
+                                    for (QueryDocumentSnapshot doc : snapshots)
+                                    {
+                                        newDocumentGet = new DocumentAvailable();
+                                        getRealTimeDocument(doc);
+                                        documentAvail.add(newDocumentGet);
+                                        Log.d("DATA", "Current data: " + documentAvail.get(i).documentName);
+                                        i++;
+                                    }
+                                    List<DocumentAvailable> docu = new ArrayList<>();
+                                    for(int j = documentAvail.size(); j > 0; j--)
+                                    {
+                                        docu.add(documentAvail.get(j - 1));
+                                    }
+
+                                    textNothing.setVisibility(View.GONE);
+                                    fileImage.setVisibility(View.GONE);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    docAdapter = new DiscussionDocAvailableAdapter(docu);
+                                    recyclerView.setAdapter(docAdapter);
+                                    recyclerView.setHasFixedSize(true);
+                                    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                                    recyclerView.setItemAnimator(new DefaultItemAnimator());
+                                    GetDatabase getDatabase = new GetDatabase();
+                                    getDatabase.execute();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if(onCreateFlag == false)
+                            {
+                                LoadData loadData = new LoadData();
+                                loadData.execute();
+                            }
+                            else{}
+                        }
+                    }
+                });
+    }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(int i) {
@@ -227,13 +321,7 @@ public class DiscussionFragment extends Fragment {
         mListener = null;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        insertNewDocAvailable = null;
-        //TODO: REMOVE LISTENER
-        registration.remove();
-    }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -250,20 +338,24 @@ public class DiscussionFragment extends Fragment {
         void onFragmentInteraction(int i);
     }
 
-    public class InsertNewDocAvailable extends AsyncTask<Void, Void, Void>
+    public class SaveFirstDocument extends AsyncTask<Void, Void, Void>
     {
         @Override
         protected Void doInBackground(Void... voids) {
+
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "personnalize").build();
 
-            for(int i = 0; i < documentAvailables.size(); i++)
+            Log.d("BACKGROUND TASK", "Background task launch");
+            Log.d("BACKGROUND TASK", "Taille dela liste du premier appel: " + documentAvail.size());
+
+            for(int i = 0; i < documentAvail.size(); i++)
             {
-                db.userDao().insertNewDocAvailable(documentAvailables.get(i));
+                db.userDao().insertNewDocAvailable(documentAvail.get(i));
             }
 
+            //List<DocumentAvailable> list = db.userDao().selectListDocAvailable();
             db.close();
-
 
             return null;
         }
@@ -271,165 +363,155 @@ public class DiscussionFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            MainProcess.newDocumentServer.setText("1");
+        }
+        //        @Override
+//        protected void onPostExecute(List<DocumentAvailable> docServer) {
+//            super.onPostExecute(docServer);
+//
+//            if(docServer.size() != 0)
+//            {
+//                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                editor.putBoolean(MainProcess.DOCUMENT_AVAILABLE, true).apply();
+//
+//                MainProcess.newDocumentServer.setText("1");
+//                fileImage.setVisibility(View.GONE);
+//                textNothing.setVisibility(View.GONE);
+//                recyclerView.setVisibility(View.VISIBLE);
+//                Log.d("BACKGROUND TASK", "create adapter before");
+//                docAdapter = new DiscussionDocAvailableAdapter(docServer);
+//                Log.d("BACKGROUND TASK", "create adapter after");
+//                Log.d("BACKGROUND TASK", "list " + docServer);
+//                recyclerView.setAdapter(docAdapter);
+//                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+//                recyclerView.setHasFixedSize(true);
+//                recyclerView.setItemAnimator(new DefaultItemAnimator());
+//                docAvailableFla = sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false);
+//                registration.remove();
+//                createListener(docAvailableFla);
+//                //firstCallBack++;
+//            }
+//            else
+//            {
+//                fileImage.setVisibility(View.VISIBLE);
+//                textNothing.setVisibility(View.VISIBLE);
+//                recyclerView.setVisibility(View.GONE);
+//            }
+//        }
+    }
 
-            MainProcess.newDocumentServer.setText("" + documentAvailables.size());
-            MainProcess.newDocumentServer.setVisibility(View.VISIBLE);
-            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
-            editor.putBoolean(MainProcess.DOCUMENT_AVAILABLE, true).commit();
+    public class SaveUpdateDocument extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
 
-            fileImage.setVisibility(View.GONE);
-            textNothing.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+            final PersonnalizeDatabase db = Room.databaseBuilder(context,
+                    PersonnalizeDatabase.class, "personnalize").build();
 
-            docAdapter = new DiscussionDocAvailableAdapter(documentAvailables);
-            recyclerView.setAdapter(docAdapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            db.userDao().insertNewDocAvailable(newDocumentGet);
+            db.close();
+            return null;
+        }
 
-
-
-//            //TODO: CHANGE FRAGMENT TO NEW DOCUMENT AVAILABLE FRAGMENT
-//            DiscussionDocAvailableFragment docAvailableFragment = new DiscussionDocAvailableFragment();
-//            MainProcess.fragmentManager.beginTransaction().replace(R.id.container_fragment_discussion_empty, docAvailableFragment).commit();
-
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            MainProcess.newDocumentServer.setText("1");
         }
     }
 
-
-    public class GetAvailableDocument extends AsyncTask<Void, Void, List<DocumentAvailable>>
+    public class LoadData extends AsyncTask<Void, Void, List<DocumentAvailable>>
     {
         @Override
         protected List<DocumentAvailable> doInBackground(Void... voids) {
 
-            PersonnalizeDatabase db = Room.databaseBuilder(context,
-                    PersonnalizeDatabase.class, "personnalize").build();
-            List<DocumentAvailable> d = db.userDao().selectListDocAvailable();
-            Log.d("LIST DO AVAILABLE", "docavailable: " + d.get(0).documentName);
-
-            db.close();
-            return d;
-        }
-
-        @Override
-        protected void onPostExecute(List<DocumentAvailable> documentAvailable) {
-            super.onPostExecute(documentAvailable);
-
-            docAdapter = new DiscussionDocAvailableAdapter(documentAvailable);
-            recyclerView.setAdapter(docAdapter);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-            registration = dbFireStore.collection("Document").addSnapshotListener(new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                    if(e != null)
-                    {
-                        Log.d("LISTENE UPDATE", "Listen failed. ", e);
-                        return;
-                    }
-
-                    if(value.isEmpty())
-                    {}
-                    else
-                    {
-                        int compteur = 0;
-                        for(QueryDocumentSnapshot doc : value)
-                        {
-                            if(compteur == 0)
-                            {
-                                Log.d("VALUE SNAPCHAT", "First call!!! Document firebase: " + doc);
-                                compteur++;
-                            }
-                            else
-                            {
-                                if(value.size() - 1 == compteur)
-                                {
-                                    Log.d("VALUE SNAPCHAT", "Document firebase: " + doc);
-                                    DocumentAvailable document = new DocumentAvailable();
-
-                                    if(doc.get("id") != null)
-                                    {
-                                        document.idServer = (Long) doc.get("id");
-                                    }
-
-                                    if(doc.get("documentName") != null)
-                                    {
-                                        document.documentName = doc.getString("documentName");
-                                    }
-                                    if(doc.get("pageNumber") != null)
-                                    {
-                                        document.pageNumber = (Long) doc.get("pageNumber");
-                                    }
-
-                                    if(doc.get("powerPoint") != null)
-                                    {
-                                        document.powerPoint = (boolean) doc.get("powerPoint");
-                                    }
-                                    if(doc.get("miseEnForme") != null)
-                                    {
-                                        document.miseEnForme = (boolean) doc.get("miseEnForme");
-                                    }
-                                    if(doc.get("documentName") != null)
-                                    {
-                                        document.deliveryDate = doc.getString("deliveryDate");
-                                    }
-                                    if(doc.get("docEnd") != null)
-                                    {
-                                        document.docEnd = (boolean) doc.get("docEnd");
-                                    }
-                                    if(doc.get("docPaid") != null)
-                                    {
-                                        document.documentPaid = (boolean) doc.get("docPaid");
-                                    }
-
-//
-                                    newDocumentGet = document;
-                                    insertNewDocAvailableNew = new InsertNewDocAvailableNew();
-                                    insertNewDocAvailable.execute();
-
-                                }
-                                else {
-                                    compteur++;
-                                }
-                            }
-
-
-                        }
-                    }
-
-                }
-            });
-
-        }
-    }
-
-    public class InsertNewDocAvailableNew extends AsyncTask<Void, Void, Void>
-    {
-        @Override
-        protected Void doInBackground(Void... voids) {
             final PersonnalizeDatabase db = Room.databaseBuilder(context,
                     PersonnalizeDatabase.class, "personnalize").build();
 
-
-                db.userDao().insertNewDocAvailable(newDocumentGet);
-
+            List<DocumentAvailable> list = db.userDao().selectListDocAvailable();
 
             db.close();
-            fileImage.setVisibility(View.GONE);
-            textNothing.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+
+            return list;
+        }
+
+        @Override
+        protected void onPostExecute(List<DocumentAvailable> documentAvailables) {
+            super.onPostExecute(documentAvailables);
+
+            if(documentAvailables.size() == 0)
+            {
+                fileImage.setVisibility(View.VISIBLE);
+                textNothing.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+                onCreateFlag = true;
+            }
+            else
+            {
+                fileImage.setVisibility(View.GONE);
+                textNothing.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                docAdapter = new DiscussionDocAvailableAdapter(documentAvail);
+                recyclerView.setAdapter(docAdapter);
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                recyclerView.setItemAnimator(new DefaultItemAnimator());
+                onCreateFlag = true;
+            }
+
+            //createListener();
+        }
+    }
+
+    public class GetDatabase extends AsyncTask<Void, Void, List<DocumentAvailable>>
+    {
+        @Override
+        protected List<DocumentAvailable> doInBackground(Void... voids) {
+
+            final PersonnalizeDatabase db = Room.databaseBuilder(context,
+                    PersonnalizeDatabase.class, "personnalize").build();
+
+            List<DocumentAvailable> list = db.userDao().selectListDocAvailable();
+            Log.d("LOCAL DATABASE", "Taille base de donnee locale" +list.size());
+
+            if(documentAvail.size() != list.size())
+            {
+
+
+                for(int i = 0; i < documentAvail.size(); i++)
+                {
+                    Log.d("ARRAY DOC", "Array Doc Background task: " + documentAvail.get(i).documentName + " Valeur de compt: "+ i);
+                    if(i < documentAvail.size() - 1)
+                    {}
+                    else
+                    {
+                        db.userDao().insertNewDocAvailable(documentAvail.get(i));
+                    }
+                }
+            }
+
+            //list = db.userDao().selectListDocAvailable();
+
+            db.close();
 
             return null;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(List<DocumentAvailable> documentAvailables) {
+            super.onPostExecute(documentAvailables);
+            //TODO: CREATE RECYCLER VIEW WITH DATA
+//
+//            fileImage.setVisibility(View.GONE);
+//            textNothing.setVisibility(View.GONE);
+//            recyclerView.setVisibility(View.VISIBLE);
+//            docAdapter = new DiscussionDocAvailableAdapter(documentAvail);
+//            recyclerView.setAdapter(docAdapter);
+//            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+//            recyclerView.setHasFixedSize(true);
+//            recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-            DiscussionDocAvailableAdapter.listDocAvailable.add(newDocumentGet);
-            docAdapter.notifyDataSetChanged();
         }
     }
-
 
 }

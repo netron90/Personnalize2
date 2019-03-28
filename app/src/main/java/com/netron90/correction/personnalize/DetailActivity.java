@@ -89,6 +89,7 @@ public class DetailActivity extends AppCompatActivity {
     public static final String PAYEMENT = "payementMode";
     private final String MONTANT_TOTAL_COMPLEMENT = "montantComplement";
     private String userName, userEmail, userPhone, userDocPath, userId;
+    private List<DiapositiveFormat> getListOnStart;
 //    private DeleteDocumentSend deleteDocumentSend;
 
     private SharedPreferences sharedPreferences;
@@ -113,8 +114,10 @@ public class DetailActivity extends AppCompatActivity {
 
     private int compteurDiapoDoc = 0;
     private int compteurDiapoImage = 0;
+    private int documentPosition = 0;
 
     private String documentFirebaseId = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +144,7 @@ public class DetailActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Finalisation");
 
         userDoc  = getIntent().getParcelableExtra("documentInfo");
+        documentPosition = getIntent().getIntExtra("document_position", 0);
 
 
         userName = sharedPreferences.getString(MainActivity.USER_NAME, "NoBody");
@@ -158,18 +162,7 @@ public class DetailActivity extends AppCompatActivity {
         correctionFauteFactureTv.setText("2000 f CFA");
 
 
-        if(userDoc.powerPoint == false)
-        {
-            iconPowerPoint.setImageResource(R.drawable.ic_clear_black_24dp);
-            powerPointFlagTv.setText("Non");
-            correctionPowerPointFactureTv.setText("-");
-        }
-        else
-        {
-            //TODO: SELECT ALL DOCUMENT DIAPO IN DATABASE
-            GetDiapositive getDiapositive = new GetDiapositive();
-            getDiapositive.execute();
-        }
+
 
         if(userDoc.miseEnForme == false)
         {
@@ -179,6 +172,7 @@ public class DetailActivity extends AppCompatActivity {
         }
         else
         {
+            factureTotalTv.setText(String.valueOf(2000 + userDoc.pageNumber * 100) + " f CFA");
             iconMiseEnForme.setImageResource(R.drawable.ic_done_black_24dp);
             miseEnFormeFlagTv.setText("Oui");
             correctionMiseEnFormeFactureTv.setText(String.valueOf(userDoc.pageNumber * 100) + " f CFA");
@@ -241,21 +235,30 @@ public class DetailActivity extends AppCompatActivity {
                                 firestoreUserDoc.miseEnForme = userDoc.miseEnForme;
                                 firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                                 firestoreUserDoc.docEnd       = false;
+                                firestoreUserDoc.userId = userId;
 
-                                dbFireStore.collection("Document").add(firestoreUserDoc).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                    @Override
-                                    public void onSuccess(DocumentReference documentReference) {
-                                        if (userDoc.powerPoint == true)
-                                        {
-                                            documentFirebaseId = documentReference.getId();
-                                            SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
-                                            sendDocumentTaskBackground.execute();
-                                        }
-                                        else{
-                                            //TODO: SEND DOCUMENT TO WBB APPS
-                                        }
-                                    }
-                                })
+                                dbFireStore.collection("Document").add(firestoreUserDoc)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                if (userDoc.powerPoint == true)
+                                                {
+                                                    //TODO: SEND DOCUMENT TO WBB APPS
+
+                                                    //TODO: SEND POWER POINT DATA
+                                                    documentFirebaseId = documentReference.getId();
+                                                    SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                                    sendDocumentTaskBackground.execute();
+                                                }
+                                                else{
+                                                    //TODO: SEND DOCUMENT TO WBB APPS
+                                                    pd.dismiss();
+                                                    Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                                    DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                                                    deleteDocumentSend.execute();
+                                                }
+                                            }
+                                        })
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
@@ -296,6 +299,7 @@ public class DetailActivity extends AppCompatActivity {
                         firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                         firestoreUserDoc.docEnd       = false;
                         firestoreUserDoc.documentPaid = false;
+                        firestoreUserDoc.userId = userId;
 
                         dbFireStore.collection("Document").add(firestoreUserDoc)
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -303,12 +307,19 @@ public class DetailActivity extends AppCompatActivity {
                                     public void onSuccess(DocumentReference documentReference) {
                                         if (userDoc.powerPoint == true)
                                         {
+                                            //TODO: SEND DOCUMENT TO WBB APPS
+
+                                            //TODO: SEND POWER POINT DATA
                                             documentFirebaseId = documentReference.getId();
                                             SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
                                             sendDocumentTaskBackground.execute();
                                         }
                                         else{
                                             //TODO: SEND DOCUMENT TO WBB APPS
+                                            pd.dismiss();
+                                            Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                            DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                                            deleteDocumentSend.execute();
                                         }
                                     }
                                 })
@@ -608,6 +619,15 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //TODO: SELECT ALL DOCUMENT DIAPO IN DATABASE
+        GetDiapositive getDiapositive = new GetDiapositive();
+        getDiapositive.execute();
+    }
+
     public static class SelectDate extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
         @Override
@@ -641,17 +661,29 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    PersonnalizeDatabase.class, "scodelux").build();
-            db.userDao().deleteOneDocument(userDoc.id);
+                    PersonnalizeDatabase.class, "personnalize").build();
 
+
+            //delete all diapo
+            List<DiapositiveFormat> diapositiveFormats = db.userDao().selectDiapos(userDoc.id);
+            if(diapositiveFormats.size() != 0)
+            {
+                for(int i = 0; i < diapositiveFormats.size(); i++)
+                {
+                    db.userDao().deleteDiapoImagePath(diapositiveFormats.get(i).id);
+                }
+                db.userDao().deleteAllDiapos(userDoc.id);
+            }
+            db.userDao().deleteOneDocument(documentNameTv.getText().toString());
             List<DocumentUser> documentUserList = db.userDao().selectAllDocument();
             //)remove element from arrayList of User documents
-            //documentUserList.remove(position);
+            DocumentAdapter.documentUserList.remove(documentPosition);
             if(documentUserList.size() == 0)
             {
 
                 SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
-                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
+                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).apply();
+                editor.putBoolean(MainProcess.DOCUMENT_AVAILABLE, true).apply();
                 //return true;
             }
             else
@@ -681,9 +713,10 @@ public class DetailActivity extends AppCompatActivity {
 //                startActivity(mainProcessActivityIntent);
 //            }
             Intent intent = new Intent(DetailActivity.this, MainProcess.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK) ;
             finish();
+            startActivity(intent);
+
         }
     }
 
@@ -799,49 +832,75 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<DiapositiveFormat> diapositiveFormats) {
             super.onPostExecute(diapositiveFormats);
-            iconPowerPoint.setImageResource(R.drawable.ic_done_black_24dp);
-            powerPointFlagTv.setText(diapositiveFormats.size() + " diapos");
-            if(diapositiveFormats.size() > 25)
+
+            getListOnStart = diapositiveFormats;
+
+            if(userDoc.powerPoint == false)
             {
-                correctionPowerPointFactureTv.setText(String.valueOf(diapositiveFormats.size() * 200) + " f CFA");
-                if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + (diapositiveFormats.size() * 200) + (userDoc.pageNumber * 100)) + " f CFA");
-                }
-                else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + (diapositiveFormats.size() * 200 )+ " f CFA"));
-                }
-                else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + (userDoc.pageNumber * 100)) + " f CFA");
-                }
-                else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
-                }
-                else{}
+                iconPowerPoint.setImageResource(R.drawable.ic_clear_black_24dp);
+                powerPointFlagTv.setText("Non");
+                correctionPowerPointFactureTv.setText("-");
             }
             else
             {
-                correctionPowerPointFactureTv.setText(String.valueOf(diapositiveFormats.size() * 100) + " f CFA");
-                if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
+                iconPowerPoint.setImageResource(R.drawable.ic_done_black_24dp);
+                powerPointFlagTv.setText(getListOnStart.size() + " diapos");
+                if(getListOnStart.size() > 25)
                 {
-                    factureTotalTv.setText(String.valueOf(2000 + (diapositiveFormats.size() * 100) + (userDoc.pageNumber * 100)) + " f CFA");
+                    correctionPowerPointFactureTv.setText(String.valueOf(getListOnStart.size() * 200) + " f CFA");
+                    if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
+                    {
+                        int montantPowerPoint = (getListOnStart.size() * 200);
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
+                    {
+                        int montantPowerPoint = getListOnStart.size() * 200;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
+                    {
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
+                    {
+                        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
+                    }
+                    else{}
                 }
-                else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
+                else
                 {
-                    factureTotalTv.setText(String.valueOf(2000 + (diapositiveFormats.size() * 100 )+ " f CFA"));
+                    correctionPowerPointFactureTv.setText(String.valueOf(getListOnStart.size() * 100) + " f CFA");
+                    if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
+                    {
+                        int montantPowerPoint = (getListOnStart.size() * 100);
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
+                    {
+                        int montantPowerPoint = getListOnStart.size() * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
+                    {
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
+                    {
+                        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
+                    }
+                    else{}
                 }
-                else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + (userDoc.pageNumber * 100)) + " f CFA");
-                }
-                else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
-                {
-                    factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
-                }
-                else{}
             }
 
         }
@@ -1032,24 +1091,24 @@ public class DetailActivity extends AppCompatActivity {
                 CollectionReference document = dbFireStore.collection("Document");
                 DocumentReference docUserSaved = document.document(documentFirebaseId);
                 CollectionReference diapoCollection = docUserSaved.collection("Diapositive");
-                diapoCollection.add(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                            @Override
-                            public void onSuccess(DocumentReference documentReference) {
-                                if (compteurDiapoDoc < documentDiapoList.size() - 1) {
-                                    compteurDiapoDoc++;
-                                    try {
-                                        sendDataPerDiapo(compteurDiapoDoc);
-                                    } catch (FileNotFoundException e) {
-                                        e.printStackTrace();
-                                    }
-                                } else {
-                                    pd.dismiss();
-                                    Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
-                                    DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
-                                    deleteDocumentSend.execute();
-                                }
+                diapoCollection.document(userId).set(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        if (compteurDiapoDoc < documentDiapoList.size() - 1) {
+                            compteurDiapoDoc++;
+                            try {
+                                sendDataPerDiapo(compteurDiapoDoc);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
                             }
-                        })
+                        } else {
+                            pd.dismiss();
+                            Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                            DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                            deleteDocumentSend.execute();
+                        }
+                    }
+                })
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
@@ -1097,9 +1156,9 @@ public class DetailActivity extends AppCompatActivity {
                     CollectionReference document = dbFireStore.collection("Document");
                     DocumentReference docUserSaved = document.document(documentFirebaseId);
                     CollectionReference diapoCollection = docUserSaved.collection("Diapositive");
-                    diapoCollection.add(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    diapoCollection.document(userId).set(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
-                        public void onSuccess(DocumentReference documentReference) {
+                        public void onSuccess(Void aVoid) {
                             if (compteurDiapoDoc < documentDiapoList.size() - 1) {
                                 compteurDiapoDoc++;
                                 try {

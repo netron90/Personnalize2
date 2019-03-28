@@ -24,8 +24,8 @@ public interface UserDao {
     public DocumentUser selectDocument(int position);
 
     //DELETE SPECIFIC ELEMENT INTO DATABASE
-    @Query("DELETE FROM document_user WHERE id = :id_document")
-    public void deleteOneDocument(int id_document);
+    @Query("DELETE FROM document_user WHERE document_info = :doc_name")
+    public void deleteOneDocument(String doc_name);
 
 //    //DELETE SPECIFIC ELEMENT INTO DATABASE
 //    @Query("DELETE FROM document_user WHERE id = :id_document")

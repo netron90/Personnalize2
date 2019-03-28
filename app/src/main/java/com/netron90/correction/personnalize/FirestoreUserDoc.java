@@ -30,10 +30,12 @@ public class FirestoreUserDoc {
 
     public boolean documentPaid;
 
+    public String userId;
+
     public FirestoreUserDoc() {
     }
 
-    public FirestoreUserDoc(int id, String documentName, int pageNumber, String nameUser, String emailUser, String phoneUser, String documentPath, boolean powerPoint, boolean miseEnForme, String deliveryDate, boolean docEnd, boolean docPaid) {
+    public FirestoreUserDoc(int id, String documentName, int pageNumber, String nameUser, String emailUser, String phoneUser, String documentPath, boolean powerPoint, boolean miseEnForme, String deliveryDate, boolean docEnd, boolean docPaid, String userId) {
 
         this.id = id;
         this.documentName = documentName;
@@ -47,6 +49,7 @@ public class FirestoreUserDoc {
         this.deliveryDate = deliveryDate;
         this.docEnd = docEnd;
         this.documentPaid = docPaid;
+        this.userId = userId;
     }
 
     public String getDocumentName() {
@@ -94,5 +97,9 @@ public class FirestoreUserDoc {
 
     public boolean isDocumentPaid() {
         return documentPaid;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }

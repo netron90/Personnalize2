@@ -46,20 +46,16 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
         if(listDocAvailable.get(position).miseEnForme == true)
         {
             holder.miseEnFormeSwitch.setText("Oui");
-            holder.miseEnFormeSwitch.setEnabled(false);
         }
         else{
             holder.miseEnFormeSwitch.setText("Non");
-            holder.miseEnFormeSwitch.setEnabled(false);
         }
         if(listDocAvailable.get(position).powerPoint == true)
         {
             holder.powerPointSwitch.setText("Oui");
-            holder.powerPointSwitch.setEnabled(false);
         }
         else{
             holder.powerPointSwitch.setText("Non");
-            holder.powerPointSwitch.setEnabled(false);
         }
 
     }
@@ -67,13 +63,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
     @Override
     public int getItemCount()
     {
-        if(listDocAvailable == null)
-        {
-            return 0;
-        }
-        else {
-            return listDocAvailable.size();
-        }
+        return listDocAvailable.size();
 
     }
 

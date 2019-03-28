@@ -50,6 +50,9 @@ public class DocumentAvailable {
     @ColumnInfo(name = "document_paid")
     public boolean documentPaid;
 
+    @ColumnInfo(name = "user_id")
+    public String userId;
+
     public DocumentAvailable() {
     }
 }

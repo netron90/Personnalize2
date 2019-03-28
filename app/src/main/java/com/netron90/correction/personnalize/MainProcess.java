@@ -62,6 +62,7 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
     public static List<DocumentUser> documentUserQuery = null;
     public static FragmentManager fragmentManager = null;
     public static android.app.FragmentManager fragmentManagerDatePicker = null;
+    private boolean emptyFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +98,9 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean emptyFragment = sharedPreferences.getBoolean(DOCUMENT_EXIST, false);
+        emptyFragment = sharedPreferences.getBoolean(DOCUMENT_EXIST, false);
         Boolean docAvailable = sharedPreferences.getBoolean(DOCUMENT_AVAILABLE, false);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -146,6 +146,28 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
 
 
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        DocumentAdapter.documentUserList = null;
+        if(emptyFragment == false)
+        {
+            TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
+            tabAdapter.addFragment(new RootFragment(), "MEMOIRES");
+            tabAdapter.addFragment(new RootDiscussionFragment(), "DISCUSSION");
+            viewPager.setAdapter(tabAdapter);
+            tabLayout.setupWithViewPager(viewPager);
+        }
+        else
+        {
+            //TODO: Load database
+            loadData = new LoadData();
+            loadData.execute();
+            Log.d("LOAD DATA", "Je suis charger!!!");
+
+        }
     }
 
     @Override
@@ -405,6 +427,7 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
                     PersonnalizeDatabase.class, "personnalize").build();
             List<DocumentUser> documentUsersListLoaded = db.userDao().selectAllDocument();
             Log.d("MainProcess", "documentUsersListLoaded size: "+documentUsersListLoaded.size());
+            db.close();
             return documentUsersListLoaded;
         }
 

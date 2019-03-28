@@ -208,6 +208,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                         userDoc.powerPoint    = powerPointSwitch.isChecked();
                         userDoc.deliveryDate  = deliveryDates.getText().toString();
                         intent.putExtra("documentInfo", userDoc);
+                        intent.putExtra("document_position", position);
 
                         context.startActivity(intent);
                     }
@@ -271,7 +272,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
 //            }
 
             //2) Delete one document from database
-            db.userDao().deleteOneDocument(documentUserList.get(position).id);
+            db.userDao().deleteOneDocument(documentUserList.get(position).documentName);
             documentUserList.clear();
             //3)select all document
             List<DocumentUser> documentSelect = db.userDao().selectAllDocument();
