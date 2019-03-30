@@ -53,6 +53,9 @@ public class DocumentAvailable {
     @ColumnInfo(name = "user_id")
     public String userId;
 
+    @ColumnInfo(name = "team_id")
+    public String teamId;
+
     public DocumentAvailable() {
     }
 }

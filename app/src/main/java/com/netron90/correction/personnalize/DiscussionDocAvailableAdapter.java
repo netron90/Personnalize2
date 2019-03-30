@@ -1,6 +1,7 @@
 package com.netron90.correction.personnalize;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -103,6 +104,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
                     else
                     {
                         Toast.makeText(context, "discussion_doc_ready", Toast.LENGTH_SHORT).show();
+                        iconDocPaid.setImageResource(R.drawable.ic_done_doc_ready_on_24dp);
                     }
                 }
             });
@@ -117,6 +119,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
                     else
                     {
                         Toast.makeText(context, R.string.discussion_doc_paid, Toast.LENGTH_SHORT).show();
+                        iconDocPaid.setImageResource(R.drawable.ic_attach_money_on_24dp);
                     }
                 }
             });
@@ -140,6 +143,9 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
                     else
                     {
                         Toast.makeText(context, "PARTIE CHAT DISPONIBLE", Toast.LENGTH_SHORT).show();
+                        Intent messageIntent = new Intent(context, ChatActivity.class);
+                        messageIntent.putExtra("teamId", listDocAvailable.get(getLayoutPosition()).teamId);
+                        context.startActivity(messageIntent);
                     }
                 }
             });

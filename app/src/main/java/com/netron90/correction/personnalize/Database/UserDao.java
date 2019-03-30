@@ -4,6 +4,8 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
+import com.netron90.correction.personnalize.UserMessage;
+
 import java.util.List;
 
 /**
@@ -92,4 +94,22 @@ public interface UserDao {
 
     @Query("SELECT * FROM document_available")
     public List<DocumentAvailable> selectListDocAvailable ();
+
+    //Update docEndField
+    @Query("UPDATE document_available SET document_finish = :doc_end WHERE id= :id")
+    public void updateDocEndField(Boolean doc_end, int id);
+
+    //Update docEndField
+    @Query("UPDATE document_available SET document_paid = :doc_paid WHERE id= :id")
+    public void updateDocPaidField(Boolean doc_paid, int id);
+
+    //Update docEndField
+    @Query("UPDATE document_available SET team_id = :team_id WHERE id= :id")
+    public void updateTeamIdField(String team_id, int id);
+
+    @Insert
+    public void insertMessageUser(UserMessage userMessage);
+
+    @Query("SELECT * FROM user_message")
+    public List<UserMessage> selectAllMessage ();
 }

@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_laucher_personnalize"
@@ -44,8 +43,10 @@
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainProcess" />
-        <activity android:name=".PowerPointForm"
-            android:parentActivityName=".MainProcess"></activity>
+        <activity
+            android:name=".PowerPointForm"
+            android:parentActivityName=".MainProcess" />
+        <activity android:name=".ChatActivity"></activity>
     </application>
 
 </manifest>

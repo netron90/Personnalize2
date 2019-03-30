@@ -43,6 +43,16 @@
 
     <string name="discussion_send_doc_paid_ready_false">Vous devez d\'abord finaliser le payement de votre document</string>
     <string name="discussion_send_doc_paid_true_ready_false">Veuillez patienter... Votre document n\'est pas encore prêt</string>
+    <string name="notification_correction_termine_title">Corrextion terminée</string>
+    <string name="notification_correction_termine_text">La correction du document %1$s est terminée</string>
+    <string name="notification_document_payer_title">Finalisation du payement</string>
+    <string name="notification_document_payer_text">Vous avez finalisé le payement du document %1$s</string>
+    <string name="notification_message_from_team">Nouveau message de l\'équipe Personnalize</string>
+    <string name="notification_message_from_team_title">Personnalize Team</string>
+    <string name="channel_name">document Notification</string>
+    <string name="channel_description">Notification for data update</string>
+    <string name="toolbar_title_chat">Chat</string>
+    <string name="chat_send_message_failed">Impossible d\'envoyer le message. Vérifier votre connexion et réessayer.</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

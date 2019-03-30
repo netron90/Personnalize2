@@ -1,15 +1,19 @@
 package com.netron90.correction.personnalize;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
 import android.provider.OpenableColumns;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
@@ -30,6 +34,9 @@ import com.aspose.words.Document;
 import com.google.firebase.auth.FirebaseAuth;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
+import com.netron90.correction.personnalize.Services.DocEndListener;
+import com.netron90.correction.personnalize.Services.DocPaidListener;
+import com.netron90.correction.personnalize.Services.NewMessageListener;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -64,6 +71,7 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
     public static android.app.FragmentManager fragmentManagerDatePicker = null;
     private boolean emptyFragment;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,7 +105,7 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 //        });
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        createNotificationChannel();
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         emptyFragment = sharedPreferences.getBoolean(DOCUMENT_EXIST, false);
@@ -146,6 +154,17 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intentDocEnd = new Intent(getApplicationContext(), DocEndListener.class);
+        Intent intentDocPaid = new Intent(getApplicationContext(), DocPaidListener.class);
+        Intent intentNewMessage = new Intent(getApplicationContext(), NewMessageListener.class);
+        startService(intentDocEnd);
+        startService(intentDocPaid);
+        startService(intentNewMessage);
     }
 
     @Override
@@ -451,6 +470,22 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel()
+    {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(DocEndListener.CHANNE_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
 }

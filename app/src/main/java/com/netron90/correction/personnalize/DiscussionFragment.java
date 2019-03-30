@@ -59,7 +59,7 @@ public class DiscussionFragment extends Fragment {
     private FirebaseFirestore dbFireStore;
     private DocumentReference documentReference;
     private SharedPreferences sharedPreferences;
-    private ListenerRegistration registration;
+    private ListenerRegistration registration, docEndRegistration, docPaidRegistration;
     private Context context;
     private RelativeLayout fileImage;
     private TextView textNothing;
@@ -122,7 +122,7 @@ public class DiscussionFragment extends Fragment {
 
 
         docAvailableFla = MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false);
-        onCreateFlag = true;
+        onCreateFlag = false;
         //createListener();
         return view;
     }
@@ -143,6 +143,12 @@ public class DiscussionFragment extends Fragment {
 //
 //        }
         createListener();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        onCreateFlag = false;
     }
 
     private boolean isOnline()
@@ -171,6 +177,11 @@ public class DiscussionFragment extends Fragment {
         if(doc.get("pageNumber") != null)
         {
             newDocumentGet.pageNumber =(long) doc.get("pageNumber");
+        }
+
+        if(doc.get("id") != null)
+        {
+            newDocumentGet.idServer =(long) doc.get("id");
         }
 
         if(doc.get("nameUser") != null)
@@ -221,6 +232,15 @@ public class DiscussionFragment extends Fragment {
         if(doc.get("userId") != null)
         {
             newDocumentGet.userId = doc.getString("userId");
+        }
+
+        if(doc.get("teamId") != null)
+        {
+            newDocumentGet.teamId = doc.getString("teamId");
+        }
+        else
+        {
+            newDocumentGet.teamId = "";
         }
     }
 
@@ -288,6 +308,7 @@ public class DiscussionFragment extends Fragment {
                         {
                             if(onCreateFlag == false)
                             {
+                                onCreateFlag = true;
                                 LoadData loadData = new LoadData();
                                 loadData.execute();
                             }

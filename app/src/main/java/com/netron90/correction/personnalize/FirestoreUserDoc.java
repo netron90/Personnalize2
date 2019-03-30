@@ -32,10 +32,12 @@ public class FirestoreUserDoc {
 
     public String userId;
 
+    public String teamId;
+
     public FirestoreUserDoc() {
     }
 
-    public FirestoreUserDoc(int id, String documentName, int pageNumber, String nameUser, String emailUser, String phoneUser, String documentPath, boolean powerPoint, boolean miseEnForme, String deliveryDate, boolean docEnd, boolean docPaid, String userId) {
+    public FirestoreUserDoc(int id, String documentName, int pageNumber, String nameUser, String emailUser, String phoneUser, String documentPath, boolean powerPoint, boolean miseEnForme, String deliveryDate, boolean docEnd, boolean docPaid, String userId, String teamId) {
 
         this.id = id;
         this.documentName = documentName;
@@ -50,6 +52,7 @@ public class FirestoreUserDoc {
         this.docEnd = docEnd;
         this.documentPaid = docPaid;
         this.userId = userId;
+        this.teamId = teamId;
     }
 
     public String getDocumentName() {
@@ -101,5 +104,9 @@ public class FirestoreUserDoc {
 
     public String getUserId() {
         return userId;
+    }
+
+    public String getTeamId() {
+        return teamId;
     }
 }

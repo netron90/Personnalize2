@@ -236,6 +236,7 @@ public class DetailActivity extends AppCompatActivity {
                                 firestoreUserDoc.deliveryDate = userDoc.deliveryDate;
                                 firestoreUserDoc.docEnd       = false;
                                 firestoreUserDoc.userId = userId;
+                                firestoreUserDoc.teamId = "";
 
                                 dbFireStore.collection("Document").add(firestoreUserDoc)
                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -244,7 +245,7 @@ public class DetailActivity extends AppCompatActivity {
                                                 if (userDoc.powerPoint == true)
                                                 {
                                                     //TODO: SEND DOCUMENT TO WBB APPS
-
+                                                    sendDocumentToTeam();
                                                     //TODO: SEND POWER POINT DATA
                                                     documentFirebaseId = documentReference.getId();
                                                     SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
@@ -300,6 +301,7 @@ public class DetailActivity extends AppCompatActivity {
                         firestoreUserDoc.docEnd       = false;
                         firestoreUserDoc.documentPaid = false;
                         firestoreUserDoc.userId = userId;
+                        firestoreUserDoc.teamId = "";
 
                         dbFireStore.collection("Document").add(firestoreUserDoc)
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -308,7 +310,7 @@ public class DetailActivity extends AppCompatActivity {
                                         if (userDoc.powerPoint == true)
                                         {
                                             //TODO: SEND DOCUMENT TO WBB APPS
-
+                                            sendDocumentToTeam();
                                             //TODO: SEND POWER POINT DATA
                                             documentFirebaseId = documentReference.getId();
                                             SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
@@ -1126,7 +1128,7 @@ public class DetailActivity extends AppCompatActivity {
         InputStream inputStream = null;
         inputStream = getContentResolver().openInputStream(uri);
         StorageReference storageReference = storage.getReference();
-        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + String.valueOf(compteurDiapoDoc + 1) + "image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
+        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + userId + "_image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
         final UploadTask uploadTask = diapoRef.putStream(inputStream);
 
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -1201,6 +1203,81 @@ public class DetailActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void sendDocumentToTeam()
+    {
+        //TODO: recreate doc Uri
+
+        Uri docUri = Uri.parse(userDocPath);
+        InputStream inputStream = null;
+
+        //create file with Uri
+        try {
+
+            //android.provider.MediaStore.Files.FileColumns.DATA
+            inputStream = getContentResolver().openInputStream(docUri);
+            AsyncHttpClient mAsyncHttpClient = new AsyncHttpClient();
+            RequestParams mRequestParams = new RequestParams();
+
+            mRequestParams.put("user_name", userName);
+            mRequestParams.put("user_email", userEmail);
+            mRequestParams.put("user_phone", userPhone);
+            mRequestParams.put("mise_page", miseEnPage.isChecked());
+            mRequestParams.put("power_point", powerPoint.isChecked());
+            mRequestParams.put("date_select", dateSelect.getText());
+            mRequestParams.put("nombre_page", documentPageDetail);
+            mRequestParams.put("documents", inputStream, fileName);
+
+            mAsyncHttpClient.post("http://mighty-refuge-23480.herokuapp.com/memoire_api", mRequestParams, new JsonHttpResponseHandler() {
+//                ProgressDialog pd;
+//                @Override
+//                public void onStart() {
+//                    String uploadingMessage = "Wait a moment";
+//                    pd = new ProgressDialog(DetailActivity.this);
+//                    pd.setTitle("Document uploading");
+//                    pd.setMessage(uploadingMessage);
+//                    pd.setIndeterminate(false);
+//                    pd.show();
+//                }
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    super.onSuccess(statusCode, headers, response);
+                    Log.d("Serveur response", "Status Code: " + statusCode + " Response body: " + response);
+                    AsyncHttpClient sendMailClient = new AsyncHttpClient();
+                    RequestParams sendMailParamsClient = new RequestParams();
+                    sendMailParamsClient.put("fileNameParams", fileName);
+                    sendMailClient.get("http://mighty-refuge-23480.herokuapp.com/send_mail_api", sendMailParamsClient, new JsonHttpResponseHandler(){
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            super.onSuccess(statusCode, headers, response);
+                            Log.d("Serveur responseMail", "Status Code: " + statusCode + "Mail Send Success and response: " + response);
+                            pd.dismiss();
+
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                            super.onFailure(statusCode, headers, responseString, throwable);
+                            Log.d("Serveur responseMail", "Status Code: " + statusCode + "Mail Send Error");
+                            pd.dismiss();
+                        }
+                    });
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                    super.onFailure(statusCode, headers, responseString, throwable);
+                    Log.d("Serveur response", "Status Code: " + statusCode + " Response body: " + responseString + " throwable: " + throwable);
+                    pd.dismiss();
+                }
+            });
+        }catch(FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }
