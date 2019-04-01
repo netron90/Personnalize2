@@ -30,4 +30,5 @@ public class UserMessage {
     public String getMessageTime() {
         return messageTime;
     }
+
 }

@@ -59,6 +59,24 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
             holder.powerPointSwitch.setText("Non");
         }
 
+        if(listDocAvailable.get(position).docEnd == false)
+        {
+            holder.iconDocReady.setImageResource(R.drawable.ic_done_doc_ready_off_24dp);
+        }
+        else
+        {
+            holder.iconDocReady.setImageResource(R.drawable.ic_done_doc_ready_on_24dp);
+        }
+
+        if(listDocAvailable.get(position).documentPaid == false)
+        {
+            holder.iconDocPaid.setImageResource(R.drawable.ic_attach_money_off_24dp);
+        }
+        else
+        {
+            holder.iconDocPaid.setImageResource(R.drawable.ic_attach_money_on_24dp);
+        }
+
     }
 
     @Override
@@ -104,7 +122,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
                     else
                     {
                         Toast.makeText(context, "discussion_doc_ready", Toast.LENGTH_SHORT).show();
-                        iconDocPaid.setImageResource(R.drawable.ic_done_doc_ready_on_24dp);
+                        //iconDocPaid.setImageResource(R.drawable.ic_done_doc_ready_on_24dp);
                     }
                 }
             });

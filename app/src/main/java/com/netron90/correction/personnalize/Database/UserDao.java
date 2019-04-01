@@ -108,8 +108,8 @@ public interface UserDao {
     public void updateTeamIdField(String team_id, int id);
 
     @Insert
-    public void insertMessageUser(UserMessage userMessage);
+    public void insertMessageUser(UserMessageDb userMessage);
 
-    @Query("SELECT * FROM user_message")
-    public List<UserMessage> selectAllMessage ();
+    @Query("SELECT * FROM user_message_db")
+    public List<UserMessageDb> selectAllMessage ();
 }

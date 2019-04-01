@@ -14,6 +14,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
+import com.netron90.correction.personnalize.Database.UserMessageDb;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ import javax.annotation.Nullable;
 
 public class ChatActivity extends AppCompatActivity {
 
+
     private Toolbar toolbar;
     private RecyclerView recyclerView;
     private EditText textMessage;
@@ -50,11 +53,14 @@ public class ChatActivity extends AppCompatActivity {
     private ListenerRegistration registration;
     private FirebaseFirestore dbFirestore;
     private SharedPreferences sharedPreferences;
-    private String userId, teamId;
+    public static String userId;
+    public static String teamId;
     private ChatMessageAdapter chatMessageAdapter = null;
     private final String MESSAGE_DATABASE = "messageDataBase";
     private UserMessage userNewMessage;
+    private UserMessageDb userMessageDb;
     private boolean eventFirstLaunch = false;
+    private List<UserMessageDb> listUserMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +74,12 @@ public class ChatActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.toolbar_title_chat));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
+
+        userId = sharedPreferences.getString(MainActivity.USER_ID, "");
         teamId = getIntent().getStringExtra("teamId");
-        if(sharedPreferences.getString("teamId", "").equals(""))
-        {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString("teamId", teamId).apply();
-        }
 
         dbFirestore = FirebaseFirestore.getInstance();
 
@@ -84,6 +87,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String textMessages = textMessage.getText().toString();
+                textMessage.setText("");
                 sendMessageMethod(textMessages, userId);
             }
         });
@@ -98,7 +102,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        chatMessageAdapter = null;
         registration.remove();
     }
 
@@ -127,7 +130,7 @@ public class ChatActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        textMessage.setText("");
+                        //textMessage.setText("");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -141,7 +144,6 @@ public class ChatActivity extends AppCompatActivity {
     private void getMessageListener()
     {
         registration = dbFirestore.collection("Message")
-                .whereEqualTo("userId", userId).whereEqualTo("teamId", teamId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
@@ -153,18 +155,21 @@ public class ChatActivity extends AppCompatActivity {
 
                         if(isOnline())
                         {
-                            //TODO: GET ALL MESSAGE
-                            if(!snapshots.isEmpty())
+                            if(chatMessageAdapter == null)
                             {
-                                if(chatMessageAdapter == null)
+                                Log.d("FIRST CALL", "First call: Adaptater null");
+                                Log.d("FIRST CALL", "Snapshot size: " + snapshots);
+                                if(!snapshots.isEmpty())
                                 {
-                                    loadDataFromFirebasde(snapshots);
-                                }
-                                else
-                                {
-                                    getOneNewMessage(snapshots);
+                                    Log.d("FIRST CALL", "First call: Load data");
+                                    loadDataFromFirebase(snapshots);
                                 }
 
+                            }
+                            else {
+                                //TODO: CHECK IF SOURCE OF EVENT COME FROM SERVE
+                                Log.d("NEW DOCUMENT", "One document just written on server");
+                                getOneNewMessage(snapshots);
                             }
                         }
                         else
@@ -180,29 +185,33 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
-    private UserMessage getNewChatMessage(QueryDocumentSnapshot dc)
+    private UserMessageDb getNewChatMessage(QueryDocumentSnapshot dc)
     {
-        String textMessage = "";
-        String author = "";
-        String time = "";
+        UserMessageDb userMessage = new UserMessageDb();
+        if(dc.get("userId") != null &&
+                (dc.getString("userId").equals(userId) || dc.getString("userId").equals(teamId)))
+        {
+            String textMessage = "";
+            String author = "";
+            String time = "";
 
-        UserMessage userMessage = new UserMessage();
+            if(dc.get("userTextMessage") != null)
+            {
+                textMessage = dc.getString("userTextMessage");
+            }
+            if(dc.get("userId") != null)
+            {
+                author = dc.getString("userId");
+            }
+            if(dc.get("messageTime") != null)
+            {
+                time = dc.getString("messageTime");
+            }
 
-        if(dc.get("userTextMessage") != null)
-        {
-            textMessage = dc.getString("userTextMessage");
+            userMessage.userTextMessage = textMessage;
+            userMessage.userId = author;
+            userMessage.messageTime = time;
         }
-        if(dc.get("userId") != null)
-        {
-            author = dc.getString("userId");
-        }
-        if(dc.get("messageTime") != null)
-        {
-            time = dc.getString("messageTime");
-        }
-        userMessage.userTextMessage = textMessage;
-        userMessage.userId = author;
-        userMessage.messageTime = time;
 
         return userMessage;
     }
@@ -216,7 +225,7 @@ public class ChatActivity extends AppCompatActivity {
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
                     PersonnalizeDatabase.class, "personnalize").build();
 
-            db.userDao().insertMessageUser(userNewMessage);
+            db.userDao().insertMessageUser(userMessageDb);
             db.close();
 
             return null;
@@ -225,19 +234,20 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getOneNewMessage(QuerySnapshot snapshots)
     {
-        if(snapshots.getMetadata().hasPendingWrites() == false)
+
+        if(snapshots.getMetadata().hasPendingWrites() == true)
         {
             for(DocumentChange dc : snapshots.getDocumentChanges())
             {
+                Log.d("NEW DOCUMENT", "One document just written on server");
                 switch (dc.getType())
                 {
                     case ADDED:
-                        userNewMessage = getNewChatMessage(dc.getDocument());
-                        ChatMessageAdapter.listUserMessage
-                                .add(getNewChatMessage(dc.getDocument()));
+                        userMessageDb = null;
+                        userMessageDb = getNewChatMessage(dc.getDocument());
+                        ChatMessageAdapter.listUserMessage.add(userMessageDb);
                         chatMessageAdapter.notifyDataSetChanged();
-                        SaveMessageInLocalDatabase saveMessageInLocalDatabase
-                                = new SaveMessageInLocalDatabase();
+                        SaveMessageInLocalDatabase saveMessageInLocalDatabase = new SaveMessageInLocalDatabase();
                         saveMessageInLocalDatabase.execute();
                         break;
                 }
@@ -245,37 +255,57 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private void loadDataFromFirebasde(QuerySnapshot snapshots)
+    private void loadDataFromFirebase(QuerySnapshot snapshots)
     {
-        List<UserMessage> userMessagesList = new ArrayList<>();
+        Log.d("ADAPTER NULL", "LoadDataFromFirebase Method fire");
+        List<UserMessageDb> userMessagesList = new ArrayList<>();
+        List<UserMessageDb> userMessagesListNew = new ArrayList<>();
 
         for(QueryDocumentSnapshot doc : snapshots)
         {
             userMessagesList.add(getNewChatMessage(doc));
+            if(sharedPreferences.getBoolean("firstMessage", false) == false)
+            {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("firstMessage", true).apply();
+                userMessageDb = getNewChatMessage(doc);
+                SaveMessageInLocalDatabase saveMessageInLocalDatabase = new SaveMessageInLocalDatabase();
+                saveMessageInLocalDatabase.execute();
+            }else{}
+        }
+        for(int i = userMessagesList.size(); i > 0; i--)
+        {
+            userMessagesListNew.add(userMessagesList.get(i-1));
         }
 
-
-        chatMessageAdapter = new ChatMessageAdapter(userMessagesList);
+        chatMessageAdapter = new ChatMessageAdapter(userMessagesListNew);
         recyclerView.setAdapter(chatMessageAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
     }
 
-    public class LoadDataFromLocalDb extends AsyncTask<Void, Void, List<UserMessage>>
+    public class LoadDataFromLocalDb extends AsyncTask<Void, Void, List<UserMessageDb>>
     {
         @Override
-        protected List<UserMessage> doInBackground(Void... voids) {
+        protected List<UserMessageDb> doInBackground(Void... voids) {
 
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
                     PersonnalizeDatabase.class, "personnalize").build();
 
-            List<UserMessage> userMsgList = db.userDao().selectAllMessage();
+            List<UserMessageDb> userMessagesList = new ArrayList<>();
+            List<UserMessageDb> userMsgList = db.userDao().selectAllMessage();
+
+            for(int i = userMsgList.size(); i > 0; i--)
+            {
+                userMessagesList.add(userMsgList.get(i-1));
+            }
 
             return userMsgList;
         }
         @Override
-        protected void onPostExecute(List<UserMessage> userMessages) {
+        protected void onPostExecute(List<UserMessageDb> userMessages) {
             super.onPostExecute(userMessages);
 
             chatMessageAdapter = new ChatMessageAdapter(userMessages);

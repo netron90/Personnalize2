@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -38,21 +39,25 @@ public class DocPaidListener extends IntentService {
     private FirebaseFirestore dbFireStore;
     ListenerRegistration docEndRegistration;
     private SharedPreferences sharedPreferences;
-    private final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-            PersonnalizeDatabase.class, "personnalize").build();
-    private final int TIME_ELLAPSE = 300000;
+    private final int TIME_ELLAPSE = 5 * 60 * 1000;
     public static final String CHANNE_ID = "channel_id";
-    public DocPaidListener(String name) {
-        super("service");
+    private boolean docPaidFlag;
+    private long id;
+    private String docName;
 
-        dbFireStore = FirebaseFirestore.getInstance();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
+    public DocPaidListener() {
+        super("name");
+
+
+
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
+        dbFireStore = FirebaseFirestore.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
         docEndListener();
     }
 
@@ -75,6 +80,7 @@ public class DocPaidListener extends IntentService {
 
     private void docEndListener()
     {
+
         docEndRegistration = dbFireStore.collection("Document")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -100,13 +106,16 @@ public class DocPaidListener extends IntentService {
                                     switch (dc.getType())
                                     {
                                         case MODIFIED:
-                                            boolean docPaidFlag = dc.getDocument().getBoolean("documentPaid");
-                                            long id            = (long)dc.getDocument().get("id");
-                                            String docName     = dc.getDocument().getString("documentName");
+                                            docPaidFlag = dc.getDocument().getBoolean("documentPaid");
+                                            id            = (long)dc.getDocument().get("id");
+                                            docName     = dc.getDocument().getString("documentName");
                                             if(docPaidFlag)
-                                                db.userDao().updateDocPaidField(docPaidFlag, (int)id);
-                                                createNotification(docName);
-                                                break;
+                                            {
+                                                UpdateField updateField = new UpdateField();
+                                                updateField.execute();
+                                            }
+
+                                            break;
 
                                     }
                                 }
@@ -120,12 +129,18 @@ public class DocPaidListener extends IntentService {
                                         .getService(getApplicationContext(),
                                                 0, intent, 0);
 
-                                alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
                             }
                             else
                             {
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                                 Intent intent = new Intent(getApplicationContext(), DocPaidListener.class);
-                                startService(intent);
+                                PendingIntent pendingIntent = PendingIntent
+                                        .getService(getApplicationContext(),
+                                                0, intent, 0);
+
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
+
 
                             }
                         }
@@ -137,7 +152,7 @@ public class DocPaidListener extends IntentService {
                                     .getService(getApplicationContext(),
                                             0, intent, 0);
 
-                            alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
                         }
                     }
                 });
@@ -160,6 +175,27 @@ public class DocPaidListener extends IntentService {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
         notificationManager.notify(1, builder.build());
 
+    }
+
+    public class UpdateField extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "personnalize").build();
+
+            db.userDao().updateDocPaidField(docPaidFlag, (int)id);
+
+            db.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            createNotification(docName);
+        }
     }
 
 

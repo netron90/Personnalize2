@@ -238,6 +238,7 @@ public class DiscussionFragment extends Fragment {
         {
             newDocumentGet.teamId = doc.getString("teamId");
         }
+
         else
         {
             newDocumentGet.teamId = "";
@@ -275,6 +276,7 @@ public class DiscussionFragment extends Fragment {
                                 }
                                 else
                                 {
+                                    MainProcess.newDocumentServer.setText("1");
                                     documentAvail = new ArrayList<>();
                                     int i = 0;
                                     for (QueryDocumentSnapshot doc : snapshots)
@@ -385,6 +387,7 @@ public class DiscussionFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             MainProcess.newDocumentServer.setText("1");
+            MainProcess.newDocumentServer.setVisibility(View.VISIBLE);
         }
         //        @Override
 //        protected void onPostExecute(List<DocumentAvailable> docServer) {

@@ -245,7 +245,7 @@ public class DetailActivity extends AppCompatActivity {
                                                 if (userDoc.powerPoint == true)
                                                 {
                                                     //TODO: SEND DOCUMENT TO WBB APPS
-                                                    sendDocumentToTeam();
+                                                   // sendDocumentToTeam();
                                                     //TODO: SEND POWER POINT DATA
                                                     documentFirebaseId = documentReference.getId();
                                                     SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
@@ -310,7 +310,7 @@ public class DetailActivity extends AppCompatActivity {
                                         if (userDoc.powerPoint == true)
                                         {
                                             //TODO: SEND DOCUMENT TO WBB APPS
-                                            sendDocumentToTeam();
+                                            //sendDocumentToTeam();
                                             //TODO: SEND POWER POINT DATA
                                             documentFirebaseId = documentReference.getId();
                                             SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();

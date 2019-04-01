@@ -46,7 +46,12 @@
         <activity
             android:name=".PowerPointForm"
             android:parentActivityName=".MainProcess" />
-        <activity android:name=".ChatActivity"></activity>
+        <activity android:name=".ChatActivity"
+            android:parentActivityName=".MainProcess"></activity>
+
+        <service android:name=".Services.DocEndListener"></service>
+        <service android:name=".Services.DocPaidListener"></service>
+        <service android:name=".Services.NewMessageListener"></service>
     </application>
 
 </manifest>

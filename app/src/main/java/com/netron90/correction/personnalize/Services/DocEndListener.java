@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
@@ -38,21 +39,24 @@ public class DocEndListener extends IntentService {
     private FirebaseFirestore dbFireStore;
     ListenerRegistration docEndRegistration;
     private SharedPreferences sharedPreferences;
-    private final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
-            PersonnalizeDatabase.class, "personnalize").build();
-    private final int TIME_ELLAPSE = 300000;
-    public static final String CHANNE_ID = "channel_id";
-    public DocEndListener(String name) {
-        super("service");
 
-        dbFireStore = FirebaseFirestore.getInstance();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
+    private final int TIME_ELLAPSE = 5 * 60 *1000;
+    public static final String CHANNE_ID = "channel_id";
+    private boolean docEndFlag;
+    private long id;
+    private String docName, teamId;
+
+    public DocEndListener() {
+        super("name");
+
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
 
+        dbFireStore = FirebaseFirestore.getInstance();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
         docEndListener();
     }
 
@@ -75,6 +79,7 @@ public class DocEndListener extends IntentService {
 
     private void docEndListener()
     {
+
         docEndRegistration = dbFireStore.collection("Document")
                 .whereEqualTo("userId", userId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -100,15 +105,18 @@ public class DocEndListener extends IntentService {
                                     switch (dc.getType())
                                     {
                                         case MODIFIED:
-                                            boolean docEndFlag = dc.getDocument().getBoolean("docEnd");
-                                            long id            = (long)dc.getDocument().get("id");
-                                            String docName     = dc.getDocument().getString("documentName");
-                                            String teamId      = dc.getDocument().getString("teamId");
+                                            docEndFlag = dc.getDocument().getBoolean("docEnd");
+                                            id            = (long)dc.getDocument().get("id");
+                                            docName     = dc.getDocument().getString("documentName");
+                                            teamId      = dc.getDocument().getString("teamId");
 
                                             if(docEndFlag)
-                                                db.userDao().updateDocEndField(docEndFlag, (int)id);
-                                                db.userDao().updateTeamIdField(teamId, (int)id);
-                                                createNotification(docName);
+                                            {
+                                                UpdateField updateField = new UpdateField();
+                                                updateField.execute();
+
+                                            }
+
                                                 break;
 
                                     }
@@ -123,12 +131,18 @@ public class DocEndListener extends IntentService {
                                         .getService(getApplicationContext(),
                                                 0, intent, 0);
 
-                                alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
                             }
                             else
                             {
-                                Intent intent = new Intent(getApplicationContext(), DocPaidListener.class);
-                                startService(intent);
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                                Intent intent = new Intent(getApplicationContext(), DocEndListener.class);
+                                PendingIntent pendingIntent = PendingIntent
+                                        .getService(getApplicationContext(),
+                                                0, intent, 0);
+
+                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
+
 
                             }
                         }
@@ -140,7 +154,7 @@ public class DocEndListener extends IntentService {
                                     .getService(getApplicationContext(),
                                             0, intent, 0);
 
-                            alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
                         }
                     }
                 });
@@ -166,4 +180,25 @@ public class DocEndListener extends IntentService {
     }
 
 
+    public class UpdateField extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    PersonnalizeDatabase.class, "personnalize").build();
+
+            db.userDao().updateDocEndField(docEndFlag, (int)id);
+            db.userDao().updateTeamIdField(teamId, (int)id);
+
+            db.close();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            createNotification(docName);
+        }
+    }
 }

@@ -4,7 +4,7 @@
     <item android:state_pressed="false">
         <shape
             android:shape="oval">
-            <solid android:color="@color/colorPrimary"/>
+            <solid android:color="#4caf50"/>
             <size android:width="30dp"
                 android:height="30dp"/>
         </shape>
@@ -12,7 +12,7 @@
     <item android:state_pressed="true">
         <shape
             android:shape="oval">
-            <solid android:color="@color/colorPrimaryDark"/>
+            <solid android:color="#388e3c"/>
             <size android:width="30dp"
                 android:height="30dp"/>
         </shape>

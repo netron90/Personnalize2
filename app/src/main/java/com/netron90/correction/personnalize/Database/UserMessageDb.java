@@ -8,8 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
  * Created by CHRISTIAN on 30/03/2019.
  */
 
-@Entity(tableName = "user_message")
-
+@Entity(tableName = "user_message_db")
 public class UserMessageDb {
 
     @PrimaryKey(autoGenerate = true)
@@ -25,5 +24,21 @@ public class UserMessageDb {
     public String messageTime;
 
     public UserMessageDb() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUserTextMessage() {
+        return userTextMessage;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public String getMessageTime() {
+        return messageTime;
     }
 }

@@ -37,18 +37,21 @@ public class NewMessageListener extends IntentService {
     private String userId, teamId;
     private SharedPreferences sharedPreferences;
     private final String CHANNE_ID = "channel_id";
-    private final int TIME_ELLAPSE = 300000;
+    private final int TIME_ELLAPSE = 5 * 60 * 1000;
 
-    public NewMessageListener(String name) {
+    public NewMessageListener() {
         super("service");
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
-        teamId = sharedPreferences.getString("teamId","");
-        dbFirestore = FirebaseFirestore.getInstance();
+
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
+        teamId = sharedPreferences.getString("teamId","");
+        dbFirestore = FirebaseFirestore.getInstance();
+
         getMessageListener();
     }
 
@@ -98,7 +101,7 @@ public class NewMessageListener extends IntentService {
                                     .getService(getApplicationContext(),
                                             0, intent, 0);
 
-                            alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
                         }
                     }
                 });
@@ -126,7 +129,7 @@ public class NewMessageListener extends IntentService {
                     .getService(getApplicationContext(),
                             0, intent, 0);
 
-            alarmManager.set(AlarmManager.ELAPSED_REALTIME, TIME_ELLAPSE, pendingIntent);
+            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
         }
         else
         {
