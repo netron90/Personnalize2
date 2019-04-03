@@ -77,6 +77,34 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tab_activity);
 
+        if(NewMessageListener.registration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            NewMessageListener.registration.remove();
+            NewMessageListener.registration= null;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+        }
+
+        if(DocEndListener.docEndRegistration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            DocEndListener.docEndRegistration.remove();
+            DocEndListener.docEndRegistration = null;
+        }
+
+        if(DocPaidListener.docPaidRegistration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            DocPaidListener.docPaidRegistration.remove();
+            DocPaidListener.docPaidRegistration = null;
+        }
+
+//        if(NewMessageListener.registration != null)
+//        {
+//            NewMessageListener.registration.remove();
+//            NewMessageListener.registration = null;
+//        }
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
@@ -154,6 +182,33 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
 
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(NewMessageListener.registration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            NewMessageListener.registration.remove();
+            NewMessageListener.registration= null;
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+        }
+
+        if(DocEndListener.docEndRegistration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            DocEndListener.docEndRegistration.remove();
+            DocEndListener.docEndRegistration = null;
+        }
+
+        if(DocPaidListener.docPaidRegistration != null)
+        {
+            Log.d("ACTIVITY START", "registration message remove");
+            DocPaidListener.docPaidRegistration.remove();
+            DocPaidListener.docPaidRegistration = null;
+        }
     }
 
     @Override

@@ -37,7 +37,7 @@ public class DocEndListener extends IntentService {
 
     private String userId;
     private FirebaseFirestore dbFireStore;
-    ListenerRegistration docEndRegistration;
+    public static ListenerRegistration docEndRegistration;
     private SharedPreferences sharedPreferences;
 
     private final int TIME_ELLAPSE = 5 * 60 *1000;
@@ -123,39 +123,9 @@ public class DocEndListener extends IntentService {
                                 }
 
                             }
-                            if(!isOnline())
-                            {
-                                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                                Intent intent = new Intent(getApplicationContext(), DocEndListener.class);
-                                PendingIntent pendingIntent = PendingIntent
-                                        .getService(getApplicationContext(),
-                                                0, intent, 0);
 
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
-                            }
-                            else
-                            {
-                                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                                Intent intent = new Intent(getApplicationContext(), DocEndListener.class);
-                                PendingIntent pendingIntent = PendingIntent
-                                        .getService(getApplicationContext(),
-                                                0, intent, 0);
-
-                                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
-
-
-                            }
                         }
-                        else
-                        {
-                            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                            Intent intent = new Intent(getApplicationContext(), DocEndListener.class);
-                            PendingIntent pendingIntent = PendingIntent
-                                    .getService(getApplicationContext(),
-                                            0, intent, 0);
 
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + TIME_ELLAPSE, pendingIntent);
-                        }
                     }
                 });
     }

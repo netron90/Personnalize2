@@ -22,14 +22,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.MetadataChanges;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
@@ -83,6 +87,13 @@ public class ChatActivity extends AppCompatActivity {
 
         dbFirestore = FirebaseFirestore.getInstance();
 
+        listUserMessage = new ArrayList<>();
+        chatMessageAdapter = new ChatMessageAdapter(listUserMessage);
+        recyclerView.setAdapter(chatMessageAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
         sendMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,7 +107,8 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        getMessageListener();
+       // getMessageListener();
+        createListener();
     }
 
     @Override
@@ -185,6 +197,78 @@ public class ChatActivity extends AppCompatActivity {
                 });
     }
 
+//    private void createListener()
+//    {
+//        registration = dbFirestore.collection("Message").orderBy("messageTime", Query.Direction.ASCENDING)
+//                .addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+//                        if(e != null)
+//                        {
+//                            return;
+//                        }
+//
+//                        if(isOnline() && !snapshots.isEmpty())
+//                        {
+//                            //if(chatMessageAdapter != null && snapshots.size() == ChatMessageAdapter.listUserMessage.size())
+////                            {
+////                                Log.d("IS ONLINE", "No data change");
+////                            }
+////                            else
+////                            {
+//                            Log.d("IS ONLINE", "Is on line work");
+//                            for(DocumentChange dc : snapshots.getDocumentChanges())
+//                            {
+//                                switch (dc.getType())
+//                                {
+//                                    case ADDED:
+//                                        Log.d("userId", "UserId: " + dc.getDocument().get("userId") + " userId on phone: " + userId + " teamId on phone " + teamId);
+//                                        userMessageDb = getNewChatMessage(dc.getDocument());
+//                                        Log.d("Data", "Data: " + dc.getDocument().getData());
+//                                        ChatMessageAdapter.listUserMessage.add(getNewChatMessage(dc.getDocument()));
+//
+//                                        break;
+//                                }
+//                            }
+//                            chatMessageAdapter.notifyDataSetChanged();
+//                            Log.d("Adaptater size", "Taille adapter: " + ChatMessageAdapter.listUserMessage.size());
+//                            SaveMessageInLocalDatabase saveMessageInLocalDatabase = new SaveMessageInLocalDatabase();
+//                            saveMessageInLocalDatabase.execute();
+//
+//
+//                        }
+//                        else
+//                        {
+//                            LoadDataFromLocalDb loadDataFromLocalDb = new LoadDataFromLocalDb();
+//                            loadDataFromLocalDb.execute();
+//                        }
+//                    }
+//                });
+//    }
+
+    private void createListener()
+    {
+
+
+        registration = dbFirestore.collection("Message").orderBy("messageTime", Query.Direction.ASCENDING)
+                .addSnapshotListener(MetadataChanges.INCLUDE, new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable final QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+
+                        //TODO: GET DATA FROM FIREBASE SERVER
+                        if(isOnline())
+                        {
+                            getDataFromFirebaseServer(snapshots);
+                        }
+                        else
+                        {
+                            getDataFromFirebaseCache(snapshots);
+                        }
+                    }
+                });
+
+    }
+
     private UserMessageDb getNewChatMessage(QueryDocumentSnapshot dc)
     {
         UserMessageDb userMessage = new UserMessageDb();
@@ -216,6 +300,22 @@ public class ChatActivity extends AppCompatActivity {
         return userMessage;
     }
 
+//    private class SaveMessageInLocalDatabase extends AsyncTask<Void,Void, Void>
+//    {
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//
+//            final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
+//                    PersonnalizeDatabase.class, "personnalize").build();
+//
+//            db.userDao().insertMessageUser(userMessageDb);
+//            db.close();
+//
+//            return null;
+//        }
+//    }
+
     private class SaveMessageInLocalDatabase extends AsyncTask<Void,Void, Void>
     {
 
@@ -225,7 +325,35 @@ public class ChatActivity extends AppCompatActivity {
             final PersonnalizeDatabase db = Room.databaseBuilder(getApplicationContext(),
                     PersonnalizeDatabase.class, "personnalize").build();
 
-            db.userDao().insertMessageUser(userMessageDb);
+            //db.userDao().insertMessageUser(userMessageDb);
+
+            if(sharedPreferences.getBoolean("firstMessage", false) == false)
+            {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean("firstMessage", true).apply();
+                for(int i = 0; i < listUserMessage.size(); i++)
+                {
+                    db.userDao().insertMessageUser(listUserMessage.get(i));
+                }
+
+            }
+            else
+            {
+                //db.userDao().insertMessageUser(userMessageDb);
+                List<UserMessageDb> listLocal = db.userDao().selectAllMessage();
+                if(listLocal.size() != ChatMessageAdapter.listUserMessage.size())
+                {
+                    for(int i = 0; i < ChatMessageAdapter.listUserMessage.size(); i++)
+                    {
+                        if(i < ChatMessageAdapter.listUserMessage.size() - 1)
+                        {}
+                        else {
+                            db.userDao().insertMessageUser(ChatMessageAdapter.listUserMessage.get(i));
+                        }
+                    }
+                }
+            }
+
             db.close();
 
             return null;
@@ -314,6 +442,57 @@ public class ChatActivity extends AppCompatActivity {
             recyclerView.setHasFixedSize(true);
             recyclerView.setItemAnimator(new DefaultItemAnimator());
         }
+    }
+
+    private void getDataFromFirebaseServer(QuerySnapshot snapshots)
+    {
+        final QuerySnapshot snapshot = snapshots;
+        dbFirestore.enableNetwork().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+
+
+                if(snapshot != null && !snapshot.isEmpty())
+                {
+                    if(ChatMessageAdapter.listUserMessage.size() != snapshot.size())
+                    {
+                        for(DocumentChange dc : snapshot.getDocumentChanges())
+                        {
+                            if(dc.getType() == DocumentChange.Type.ADDED)
+                            {
+                                ChatMessageAdapter.listUserMessage.add(getNewChatMessage(dc.getDocument()));
+                            }
+                        }
+                        chatMessageAdapter.notifyDataSetChanged();
+                    }
+
+                }
+            }
+        });
+    }
+
+    private void getDataFromFirebaseCache(QuerySnapshot snapshots)
+    {
+        final QuerySnapshot snapshot = snapshots;
+
+        dbFirestore.disableNetwork().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if(ChatMessageAdapter.listUserMessage.size() != snapshot.size())
+                {
+                    for(DocumentChange dc : snapshot.getDocumentChanges())
+                    {
+                        if(dc.getType() == DocumentChange.Type.ADDED)
+                        {
+                            ChatMessageAdapter.listUserMessage.add(getNewChatMessage(dc.getDocument()));
+                        }
+                    }
+                    chatMessageAdapter.notifyDataSetChanged();
+                }
+            }
+        });
     }
 
 }
