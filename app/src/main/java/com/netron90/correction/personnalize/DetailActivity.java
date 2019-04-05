@@ -1114,7 +1114,7 @@ public class DetailActivity extends AppCompatActivity {
         InputStream inputStream = null;
         inputStream = getContentResolver().openInputStream(uri);
         StorageReference storageReference = storage.getReference();
-        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + compteurDiapoDoc + 1+"/" + userId + "/image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
+        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + String.valueOf(compteurDiapoDoc + 1)+"/" + userId + "/image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
         final UploadTask uploadTask = diapoRef.putStream(inputStream);
 
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
