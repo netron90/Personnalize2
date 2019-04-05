@@ -255,6 +255,11 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
             startActivity(loginIntent);
             return true;
         }
+        if(item.getItemId() == R.id.about)
+        {
+            Intent intent = new Intent(MainProcess.this, AboutActivity.class);
+            startActivity(intent);
+        }
         return super.onOptionsItemSelected(item);
     }
 

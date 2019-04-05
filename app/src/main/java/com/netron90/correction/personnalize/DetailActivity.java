@@ -107,7 +107,7 @@ public class DetailActivity extends AppCompatActivity {
     List<DiapositiveFormat> documentDiapoList;
     List<List<DiapoImagePath>>  diapoImagePath;
     private int montantTotalComplement = 0;
-    private final int MONTANT_MISE_EN_PAGE = 2500, MONTANT_POWER_POINT = 10000, MONTANT_NBR_PAGE = 200;
+    private final int MONTANT_CORRECTION = 5000, MONTANT_POWER_POINT = 10000, MONTANT_NBR_PAGE = 200;
     private FirebaseStorage storage;
     private FirebaseFirestore dbFireStore;
     private List<Task<Uri>> urlDownload = new ArrayList<>();
@@ -162,21 +162,6 @@ public class DetailActivity extends AppCompatActivity {
         correctionFauteFactureTv.setText("2000 f CFA");
 
 
-
-
-        if(userDoc.miseEnForme == false)
-        {
-            iconMiseEnForme.setImageResource(R.drawable.ic_clear_black_24dp);
-            miseEnFormeFlagTv.setText("Non");
-            correctionMiseEnFormeFactureTv.setText("-");
-        }
-        else
-        {
-            factureTotalTv.setText(String.valueOf(2000 + userDoc.pageNumber * 100) + " f CFA");
-            iconMiseEnForme.setImageResource(R.drawable.ic_done_black_24dp);
-            miseEnFormeFlagTv.setText("Oui");
-            correctionMiseEnFormeFactureTv.setText(String.valueOf(userDoc.pageNumber * 100) + " f CFA");
-        }
 
         buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -849,61 +834,61 @@ public class DetailActivity extends AppCompatActivity {
                 powerPointFlagTv.setText(getListOnStart.size() + " diapos");
                 if(getListOnStart.size() > 25)
                 {
+
                     correctionPowerPointFactureTv.setText(String.valueOf(getListOnStart.size() * 200) + " f CFA");
-                    if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
-                    {
-                        int montantPowerPoint = (getListOnStart.size() * 200);
-                        int montantMiseEnForme = userDoc.pageNumber * 100;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
-                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
-                    }
-                    else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
-                    {
-                        int montantPowerPoint = getListOnStart.size() * 200;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
-                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
-                    }
-                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
-                    {
-                        int montantMiseEnForme = userDoc.pageNumber * 100;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
-                        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
-                    }
-                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
-                    {
-                        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
-                    }
-                    else{}
+
                 }
                 else
                 {
                     correctionPowerPointFactureTv.setText(String.valueOf(getListOnStart.size() * 100) + " f CFA");
-                    if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
-                    {
-                        int montantPowerPoint = (getListOnStart.size() * 100);
-                        int montantMiseEnForme = userDoc.pageNumber * 100;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
-                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
-                    }
-                    else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
-                    {
-                        int montantPowerPoint = getListOnStart.size() * 100;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
-                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
-                    }
-                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
-                    {
-                        int montantMiseEnForme = userDoc.pageNumber * 100;
-                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
-                        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
-                    }
-                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
-                    {
-                        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
-                    }
-                    else{}
+
                 }
             }
+
+            if(userDoc.miseEnForme == false)
+            {
+                iconMiseEnForme.setImageResource(R.drawable.ic_clear_black_24dp);
+                miseEnFormeFlagTv.setText("Non");
+                correctionMiseEnFormeFactureTv.setText("-");
+            }
+            else
+            {
+                //factureTotalTv.setText(String.valueOf(2000 + userDoc.pageNumber * 100) + " f CFA");
+                iconMiseEnForme.setImageResource(R.drawable.ic_done_black_24dp);
+                miseEnFormeFlagTv.setText("Oui");
+                correctionMiseEnFormeFactureTv.setText(String.valueOf(userDoc.pageNumber * 200) + " f CFA");
+            }
+
+            if(!userDoc.powerPoint && !userDoc.miseEnForme)
+            {
+                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION));
+            }
+            else if(!userDoc.powerPoint && userDoc.miseEnForme)
+            {
+                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + userDoc.pageNumber * 200));
+            }
+            else if(userDoc.powerPoint && !userDoc.miseEnForme)
+            {
+                if(getListOnStart.size() > 25)
+                {
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) ));
+                }
+                else {
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) ));
+                }
+            }
+            else if(userDoc.powerPoint && userDoc.miseEnForme){
+                if(getListOnStart.size() > 25)
+                {
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) + (userDoc.pageNumber * 200)));
+                }
+                else {
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) + userDoc.pageNumber * 200));
+                }
+            }else{
+                factureTotalTv.setText("-");
+            }
+
 
         }
     }
@@ -1084,7 +1069,7 @@ public class DetailActivity extends AppCompatActivity {
 //                }
 //            } else {
                 Log.d("SEND IMAGE", "Plus de diapo.Save collection Diapositive");
-                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc);
+                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc, documentDiapoList.get(compteurDiapoDoc).nbrImage);
 
 //                FireStoreDiapo fireStoreDiapo = new FireStoreDiapo();
 //                fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
@@ -1098,6 +1083,7 @@ public class DetailActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         if (compteurDiapoDoc < documentDiapoList.size() - 1) {
                             compteurDiapoDoc++;
+                            compteurDiapoImage = 0;
                             try {
                                 sendDataPerDiapo(compteurDiapoDoc);
                             } catch (FileNotFoundException e) {
@@ -1128,7 +1114,7 @@ public class DetailActivity extends AppCompatActivity {
         InputStream inputStream = null;
         inputStream = getContentResolver().openInputStream(uri);
         StorageReference storageReference = storage.getReference();
-        final StorageReference diapoRef = storageReference.child("image_diapo/diapo/" + userId + "/image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
+        final StorageReference diapoRef = storageReference.child("image_diapo/diapo" + compteurDiapoDoc + 1+"/" + userId + "/image" + String.valueOf(compteurDiapoImage + 1) + ".jpg");
         final UploadTask uploadTask = diapoRef.putStream(inputStream);
 
         uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -1137,7 +1123,7 @@ public class DetailActivity extends AppCompatActivity {
                 //urlDownload.add(taskSnapshot.getStorage().getDownloadUrl());
                 Log.d("URL DOWNLOAD", "URL Download: " + urlDownload);
                 endResul[0] = true;
-                if (position < diapoImagePath.get(compteurDiapoDoc).size() - 1) {
+                if (position < documentDiapoList.get(compteurDiapoDoc).nbrImage - 1) {
                     Log.d("URL DOWNLOAD", "Upload Image continue ");
                     compteurDiapoImage++;
                     try {
@@ -1148,7 +1134,7 @@ public class DetailActivity extends AppCompatActivity {
                 } else {
                     Log.d("URL DOWNLOAD", "Upload Image End!!!");
 
-                    FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc);
+                    FireStoreDiapo fireStoreDiapo = new FireStoreDiapo(documentDiapoList.get(compteurDiapoDoc).diapoTitle, documentDiapoList.get(compteurDiapoDoc).diapoDesc, documentDiapoList.get(compteurDiapoDoc).nbrImage);
 
 //                        fireStoreDiapo.diapoTitle = documentDiapoList.get(compteurDiapoDoc).diapoTitle;
 //                        fireStoreDiapo.diapoContent = documentDiapoList.get(compteurDiapoDoc).diapoDesc;
@@ -1158,11 +1144,12 @@ public class DetailActivity extends AppCompatActivity {
                     CollectionReference document = dbFireStore.collection("Document");
                     DocumentReference docUserSaved = document.document(documentFirebaseId);
                     CollectionReference diapoCollection = docUserSaved.collection("Diapositive");
-                    diapoCollection.document(userId).set(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    diapoCollection.add(fireStoreDiapo).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
-                        public void onSuccess(Void aVoid) {
+                        public void onSuccess(DocumentReference documentReference) {
                             if (compteurDiapoDoc < documentDiapoList.size() - 1) {
                                 compteurDiapoDoc++;
+                                compteurDiapoImage = 0;
                                 try {
                                     sendDataPerDiapo(compteurDiapoDoc);
                                 } catch (FileNotFoundException e) {
@@ -1281,5 +1268,57 @@ public class DetailActivity extends AppCompatActivity {
     }
 
 }
+
+/*if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
+        {
+        int montantPowerPoint = (getListOnStart.size() * 200);
+        int montantMiseEnForme = userDoc.pageNumber * 100;
+        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
+        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
+        }
+        else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
+        {
+        int montantPowerPoint = getListOnStart.size() * 200;
+        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
+        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
+        }
+        else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
+        {
+        int montantMiseEnForme = userDoc.pageNumber * 100;
+        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
+        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
+        }
+        else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
+        {
+        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
+        }
+        else{}*/
+
+/*
+if(userDoc.powerPoint == true && userDoc.miseEnForme == true)
+                    {
+                        int montantPowerPoint = (getListOnStart.size() * 100);
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint + "Montant Mise en forme " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == true && userDoc.miseEnForme == false)
+                    {
+                        int montantPowerPoint = getListOnStart.size() * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantPowerPoint);
+                        factureTotalTv.setText(String.valueOf(2000 + montantPowerPoint)+ " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == true)
+                    {
+                        int montantMiseEnForme = userDoc.pageNumber * 100;
+                        Log.d("CALCUL FACTURE", "true true. Power Point: " + montantMiseEnForme);
+                        factureTotalTv.setText(String.valueOf(2000 + montantMiseEnForme) + " f CFA");
+                    }
+                    else if(userDoc.powerPoint == false && userDoc.miseEnForme == false)
+                    {
+                        factureTotalTv.setText(String.valueOf(2000 + " f CFA"));
+                    }
+                    else{}*/
+
 
 //iPgi8GrwAoNHyYveiEi3

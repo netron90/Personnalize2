@@ -16,22 +16,22 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <RelativeLayout
-                android:id="@+id/block_delete_doc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_margin="4dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:padding="4dp">
-                <ImageView
-                    android:id="@+id/delete_doc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_assignment_turned_in_black_24dp"/>
-            </RelativeLayout>
+            <!--<RelativeLayout-->
+                <!--android:id="@+id/block_delete_doc"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_margin="4dp"-->
+                <!--android:background="?attr/selectableItemBackground"-->
+                <!--android:clickable="true"-->
+                <!--android:focusable="true"-->
+                <!--android:padding="4dp">-->
+                <!--<ImageView-->
+                    <!--android:id="@+id/delete_doc"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:src="@drawable/ic_assignment_turned_in_black_24dp"/>-->
+            <!--</RelativeLayout>-->
             <RelativeLayout
                 android:id="@+id/bloc1"
                 android:layout_width="match_parent"
@@ -197,6 +197,7 @@
 
                     <ImageView
 
+                        android:id="@+id/icon_chat"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chat_off_24dp"

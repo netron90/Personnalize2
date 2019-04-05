@@ -77,6 +77,15 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
             holder.iconDocPaid.setImageResource(R.drawable.ic_attach_money_on_24dp);
         }
 
+        if(listDocAvailable.get(position).documentPaid && listDocAvailable.get(position).docEnd)
+        {
+            holder.icon_chat.setImageResource(R.drawable.ic_chat_on_24dp);
+        }
+        else
+        {
+            holder.icon_chat.setImageResource(R.drawable.ic_chat_off_24dp);
+        }
+
     }
 
     @Override
@@ -89,7 +98,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView documentName, documentPage, deliveryDates, powerPointSwitch, miseEnFormeSwitch;
-        ImageView iconDocReady, iconDocPaid;
+        ImageView iconDocReady, iconDocPaid, icon_chat;
 
         private RelativeLayout docReady, docPaidLayout, startDiscussion, deleteBlock;
 
@@ -105,6 +114,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
 
             iconDocReady       = (ImageView) itemView.findViewById(R.id.icon_doc_ready);
             iconDocPaid        = (ImageView) itemView.findViewById(R.id.icon_doc_paid);
+            icon_chat          = (ImageView) itemView.findViewById(R.id.icon_chat);
             docReady           = (RelativeLayout) itemView.findViewById(R.id.doc_ready_layout);
             docPaidLayout      = (RelativeLayout) itemView.findViewById(R.id.doc_paid_layout);
 

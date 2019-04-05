@@ -14,14 +14,15 @@ public class FireStoreDiapo {
 
     public String diapoTitle;
     public String diapoContent;
+    public int nombreImage;
 
     public FireStoreDiapo() {
     }
 
-    public FireStoreDiapo(String diapoTitle, String diapoContent) {
+    public FireStoreDiapo(String diapoTitle, String diapoContent, int nombreImage) {
         this.diapoTitle = diapoTitle;
         this.diapoContent = diapoContent;
-
+        this.nombreImage = nombreImage;
     }
 
     public String getDiapoTitle() {
@@ -31,7 +32,7 @@ public class FireStoreDiapo {
         return diapoContent;
     }
 
-
-
-
+    public int getNombreImage() {
+        return nombreImage;
+    }
 }
