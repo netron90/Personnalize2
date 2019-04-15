@@ -34,7 +34,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 public class MainActivity extends AppCompatActivity {
 
-    private RelativeLayout gmailButton;
+    private RelativeLayout comptePersonnalize;
     private LoginButton facebookButton;
     private SignInButton buttonGmail;
     private CallbackManager mCallbackManager;
@@ -57,8 +57,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        comptePersonnalize = (RelativeLayout) findViewById(R.id.compte_personnalize);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
+
+        //Connect with Personnalize account
+        comptePersonnalize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connectWithPersonnalize();
+            }
+        });
 
         // Initialize Facebook Login button
         mCallbackManager = CallbackManager.Factory.create();
@@ -123,11 +132,16 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void connectWithPersonnalize() {
+        Intent intent = new Intent(MainActivity.this, PersonnalizeForm.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
 
-        if(mAuth.getCurrentUser() != null)
+        if(mAuth.getCurrentUser() != null || sharedPreferences.getBoolean(PersonnalizeForm.PERSONNALIZE_COMPTE, false) == true)
         {
             Log.d("Personnalize", "Facebook btn clicked!");
             Intent intent = new Intent(MainActivity.this, MainProcess.class);

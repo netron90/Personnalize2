@@ -14,11 +14,11 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="50">
+            android:layout_weight="60">
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/personnalize_logo_100x100"
+                android:layout_width="100dp"
+                android:layout_height="150dp"
+                android:src="@drawable/personnalize_logo_1"
                 android:layout_centerInParent="true"
                 android:id="@+id/personnalize_logo"/>
 
@@ -29,6 +29,7 @@
                 android:layout_below="@id/personnalize_logo"
                 android:layout_centerHorizontal="true"
                 android:text="@string/app_name_uppercase"
+                android:layout_marginTop="16dp"
                 android:textColor="@color/colorWhite"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
             <RelativeLayout
@@ -45,7 +46,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="50"
+            android:layout_weight="40"
             >
             <com.facebook.login.widget.LoginButton
                 android:id="@+id/login_button"
@@ -127,6 +128,39 @@
                 android:layout_below="@id/login_button"
                 android:layout_marginTop="16dp"
                 android:id="@+id/gmail_singin_button"></com.google.android.gms.common.SignInButton>
+            <android.support.v7.widget.CardView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                app:cardUseCompatPadding="true"
+                app:cardElevation="@dimen/cardview_default_elevation"
+                app:cardCornerRadius="@dimen/cardview_default_radius"
+                android:layout_below="@id/gmail_singin_button"
+                android:layout_marginTop="6dp">
+                <RelativeLayout
+                    android:id="@+id/compte_personnalize"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:id="@+id/icon_compte"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_person_black_24dp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/compte_personnalize"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="16dp"/>
+                </RelativeLayout>
+            </android.support.v7.widget.CardView>
         </RelativeLayout>
     </LinearLayout>
 

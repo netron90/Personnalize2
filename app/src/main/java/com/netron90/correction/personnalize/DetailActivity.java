@@ -58,6 +58,7 @@ import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.net.URI;
@@ -107,7 +108,8 @@ public class DetailActivity extends AppCompatActivity {
     List<DiapositiveFormat> documentDiapoList;
     List<List<DiapoImagePath>>  diapoImagePath;
     private int montantTotalComplement = 0;
-    private final int MONTANT_CORRECTION = 5000, MONTANT_POWER_POINT = 10000, MONTANT_NBR_PAGE = 200;
+    private final int MONTANT_CORRECTION = 5000, MONTANT_NBR_PAGE = 200;
+    private int  MONTANT_TO_SEND = 0;
     private FirebaseStorage storage;
     private FirebaseFirestore dbFireStore;
     private List<Task<Uri>> urlDownload = new ArrayList<>();
@@ -151,6 +153,7 @@ public class DetailActivity extends AppCompatActivity {
         userEmail = sharedPreferences.getString(MainActivity.USER_EMAIL, "No Email");
         userPhone = sharedPreferences.getString(MainActivity.USER_PHONE, "No PhoneNumber");
         userId = sharedPreferences.getString(MainActivity.USER_ID, UUID.randomUUID().toString());
+        userDocPath = userDoc.documentPath;
 
         documentNameTv.setText(userDoc.documentName);
         documentDeliveryDateTv.setText(userDoc.deliveryDate);
@@ -159,7 +162,7 @@ public class DetailActivity extends AppCompatActivity {
         dbFireStore      = FirebaseFirestore.getInstance();
 
 
-        correctionFauteFactureTv.setText("2000 f CFA");
+        correctionFauteFactureTv.setText(String.valueOf(MONTANT_CORRECTION)+" f CFA");
 
 
 
@@ -230,18 +233,20 @@ public class DetailActivity extends AppCompatActivity {
                                                 if (userDoc.powerPoint == true)
                                                 {
                                                     //TODO: SEND DOCUMENT TO WBB APPS
-                                                   // sendDocumentToTeam();
-                                                    //TODO: SEND POWER POINT DATA
                                                     documentFirebaseId = documentReference.getId();
-                                                    SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
-                                                    sendDocumentTaskBackground.execute();
+                                                    sendDocumentToTeam();
+                                                    //TODO: SEND POWER POINT DATA
+//                                                    documentFirebaseId = documentReference.getId();
+//                                                    SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+//                                                    sendDocumentTaskBackground.execute();
                                                 }
                                                 else{
                                                     //TODO: SEND DOCUMENT TO WBB APPS
-                                                    pd.dismiss();
-                                                    Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
-                                                    DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
-                                                    deleteDocumentSend.execute();
+                                                    sendDocumentToTeam();
+//                                                    pd.dismiss();
+//                                                    Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+//                                                    DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+//                                                    deleteDocumentSend.execute();
                                                 }
                                             }
                                         })
@@ -262,6 +267,7 @@ public class DetailActivity extends AppCompatActivity {
                     }
                     else
                     {
+                        fileName = "document_api_"+UUID.randomUUID().toString()+".docx";
                         String uploadingMessage = "Wait a moment";
                         pd = new ProgressDialog(DetailActivity.this);
                         pd.setTitle("Document uploading");
@@ -295,18 +301,15 @@ public class DetailActivity extends AppCompatActivity {
                                         if (userDoc.powerPoint == true)
                                         {
                                             //TODO: SEND DOCUMENT TO WBB APPS
-                                            //sendDocumentToTeam();
-                                            //TODO: SEND POWER POINT DATA
                                             documentFirebaseId = documentReference.getId();
-                                            SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
-                                            sendDocumentTaskBackground.execute();
+                                            sendDocumentToTeam();
+
+
                                         }
                                         else{
                                             //TODO: SEND DOCUMENT TO WBB APPS
-                                            pd.dismiss();
-                                            Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
-                                            DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
-                                            deleteDocumentSend.execute();
+                                            sendDocumentToTeam();
+
                                         }
                                     }
                                 })
@@ -856,34 +859,41 @@ public class DetailActivity extends AppCompatActivity {
                 //factureTotalTv.setText(String.valueOf(2000 + userDoc.pageNumber * 100) + " f CFA");
                 iconMiseEnForme.setImageResource(R.drawable.ic_done_black_24dp);
                 miseEnFormeFlagTv.setText("Oui");
+                MONTANT_TO_SEND = userDoc.pageNumber * 200;
                 correctionMiseEnFormeFactureTv.setText(String.valueOf(userDoc.pageNumber * 200) + " f CFA");
             }
 
             if(!userDoc.powerPoint && !userDoc.miseEnForme)
             {
-                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION));
+                MONTANT_TO_SEND = MONTANT_CORRECTION;
+                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION)+" f CFA");
             }
             else if(!userDoc.powerPoint && userDoc.miseEnForme)
             {
-                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + userDoc.pageNumber * 200));
+                MONTANT_TO_SEND = MONTANT_CORRECTION + userDoc.pageNumber * 200;
+                factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + userDoc.pageNumber * 200)+" f CFA");
             }
             else if(userDoc.powerPoint && !userDoc.miseEnForme)
             {
                 if(getListOnStart.size() > 25)
                 {
-                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) ));
+                    MONTANT_TO_SEND = MONTANT_CORRECTION + (getListOnStart.size() * 200);
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) )+" f CFA");
                 }
                 else {
-                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) ));
+                    MONTANT_TO_SEND = MONTANT_CORRECTION + (getListOnStart.size() * 100);
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) )+" f CFA");
                 }
             }
             else if(userDoc.powerPoint && userDoc.miseEnForme){
                 if(getListOnStart.size() > 25)
                 {
-                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) + (userDoc.pageNumber * 200)));
+                    MONTANT_TO_SEND = MONTANT_CORRECTION + (getListOnStart.size() * 200) + (userDoc.pageNumber * 200);
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 200) + (userDoc.pageNumber * 200))+" f CFA");
                 }
                 else {
-                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) + userDoc.pageNumber * 200));
+                    MONTANT_TO_SEND = MONTANT_CORRECTION + (getListOnStart.size() * 200) + (userDoc.pageNumber * 100);
+                    factureTotalTv.setText(String.valueOf(MONTANT_CORRECTION + (getListOnStart.size() * 100) + userDoc.pageNumber * 200)+" f CFA");
                 }
             }else{
                 factureTotalTv.setText("-");
@@ -1203,17 +1213,21 @@ public class DetailActivity extends AppCompatActivity {
         try {
 
             //android.provider.MediaStore.Files.FileColumns.DATA
+            Log.d("INPUT STREAM", "Input Stream: " + docUri);
             inputStream = getContentResolver().openInputStream(docUri);
+            Log.d("INPUT STREAM", "Input Stream: " + inputStream);
+
             AsyncHttpClient mAsyncHttpClient = new AsyncHttpClient();
             RequestParams mRequestParams = new RequestParams();
-
+            Log.d("Serveur responseMail", "user_name param: " + userName);
             mRequestParams.put("user_name", userName);
             mRequestParams.put("user_email", userEmail);
             mRequestParams.put("user_phone", userPhone);
-            mRequestParams.put("mise_page", miseEnPage.isChecked());
-            mRequestParams.put("power_point", powerPoint.isChecked());
-            mRequestParams.put("date_select", dateSelect.getText());
-            mRequestParams.put("nombre_page", documentPageDetail);
+            mRequestParams.put("mise_page", userDoc.miseEnForme);
+            mRequestParams.put("power_point", userDoc.powerPoint);
+            mRequestParams.put("date_select", userDoc.deliveryDate);
+            mRequestParams.put("nombre_page", userDoc.pageNumber);
+            mRequestParams.put("facture", MONTANT_TO_SEND);
             mRequestParams.put("documents", inputStream, fileName);
 
             mAsyncHttpClient.post("http://mighty-refuge-23480.herokuapp.com/memoire_api", mRequestParams, new JsonHttpResponseHandler() {
@@ -1241,6 +1255,18 @@ public class DetailActivity extends AppCompatActivity {
                             super.onSuccess(statusCode, headers, response);
                             Log.d("Serveur responseMail", "Status Code: " + statusCode + "Mail Send Success and response: " + response);
                             pd.dismiss();
+                            if(userDoc.powerPoint== true)
+                            {
+                                //TODO: SEND POWER POINT DATA
+                                SendDocumentTaskBackground sendDocumentTaskBackground = new SendDocumentTaskBackground();
+                                sendDocumentTaskBackground.execute();
+                            }
+                            else{
+                                pd.dismiss();
+                                Toast.makeText(DetailActivity.this, "Document Envoyé avec succès.", Toast.LENGTH_SHORT).show();
+                                DeleteDocumentSend deleteDocumentSend = new DeleteDocumentSend();
+                                deleteDocumentSend.execute();
+                            }
 
                         }
 

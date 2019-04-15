@@ -195,6 +195,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
                         String userPhone    = documentUserList.get(position).phoneUser;
                         String documentPath = documentUserList.get(position).documentPath;
                         Log.d("PageDoc", "Document Page Adapter: "+documentPage);
+                        Log.d("PageDoc", "Chemin du document: "+documentPath);
                         DocumentUser userDoc = new DocumentUser();
                         userDoc.id = documentUserList.get(position).id;
                         userDoc.documentName = documentName;

@@ -250,6 +250,11 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
         {
            // drawerLayout.openDrawer(GravityCompat.START);
             FirebaseAuth.getInstance().signOut();
+            if(sharedPreferences.getBoolean(PersonnalizeForm.PERSONNALIZE_COMPTE, false) == true)
+            {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(PersonnalizeForm.PERSONNALIZE_COMPTE, false).apply();
+            }
             Intent loginIntent = new Intent(MainProcess.this, MainActivity.class);
             finish();
             startActivity(loginIntent);
@@ -265,19 +270,39 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
 
     @Override
     public void onFragmentInteraction(int i) {
-        if(i == 1)
-        {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER);
+        if(i == 1) {
+            if (Build.VERSION.SDK_INT < 19)
+            {
+                Log.d("SDK INT", "SDK Version < 19");
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                //intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                startActivityForResult(Intent.createChooser(intent, "Choose your document"), FILE_BROWSER);
+            }
+            else{
+                Log.d("SDK INT", "SDK Version > 19");
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER);
+            }
+
         }
         else if(i == 2)
         {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-            startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER_SEOND);
+            if(Build.VERSION.SDK_INT < 19)
+            {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER_SEOND);
+            }else{
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER_SEOND);
+            }
+
         }
 
 
