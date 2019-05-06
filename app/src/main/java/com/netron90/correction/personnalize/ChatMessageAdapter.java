@@ -1,6 +1,8 @@
 package com.netron90.correction.personnalize;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -23,9 +25,10 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
 
     public static List<UserMessageDb> listUserMessage;
     private Context context;
+    private SharedPreferences sharedPreferences;
 
     public ChatMessageAdapter(List<UserMessageDb> listUserMessage) {
-        this.listUserMessage = listUserMessage;
+        ChatMessageAdapter.listUserMessage = listUserMessage;
     }
 
     @NonNull
@@ -40,11 +43,9 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        if(listUserMessage.get(position).getUserId().equals(ChatActivity.userId))
+        if(listUserMessage.get(position).getAuthor().equals(ChatActivity.sharedPreferences.getString(MainActivity.USER_NAME, "Inconnu")))
         {
-//            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)holder.chatLayoutContent.getLayoutParams();
-//            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-//            holder.chatLayoutContent.setLayoutParams(layoutParams);
+            //String messageAuthor = sharedPreferences.getString(MainActivity.USER_NAME, "Inconnue");
             holder.paramsCard.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             holder.chatLayoutContent.setBackgroundColor(ContextCompat.getColor(context, R.color.chatBackgroundColor));
             holder.chatUserName.setText("Vous");
@@ -54,9 +55,7 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         else
         {
             holder.paramsCard.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-//            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)holder.chatLayoutContent.getLayoutParams();
-//            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-//            holder.chatLayoutContent.setLayoutParams(layoutParams);
+
             holder.chatLayoutContent.setBackgroundColor(ContextCompat.getColor(context, R.color.colorLigthWhite));
             holder.chatUserName.setText("Team Personnalize");
             holder.chatMessageContent.setText(listUserMessage.get(position).getUserTextMessage());
@@ -78,10 +77,10 @@ public class ChatMessageAdapter extends RecyclerView.Adapter<ChatMessageAdapter.
         public ViewHolder(View itemView) {
             super(itemView);
 
-            chatUserName = (TextView) itemView.findViewById(R.id.chat_user_name);
-            chatMessageContent = (TextView) itemView.findViewById(R.id.chat_content);
-            chatMessageTime = (TextView) itemView.findViewById(R.id.chat_time);
-            chatLayoutContent = (CardView) itemView.findViewById(R.id.cardView);
+            chatUserName = itemView.findViewById(R.id.chat_user_name);
+            chatMessageContent = itemView.findViewById(R.id.chat_content);
+            chatMessageTime = itemView.findViewById(R.id.chat_time);
+            chatLayoutContent = itemView.findViewById(R.id.cardView);
             paramsCard = (RelativeLayout.LayoutParams) chatLayoutContent.getLayoutParams();
         }
     }

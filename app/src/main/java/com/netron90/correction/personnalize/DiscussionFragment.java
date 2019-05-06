@@ -157,14 +157,7 @@ public class DiscussionFragment extends Fragment {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo != null && networkInfo.isConnected())
-        {
-            isConnected = true;
-        }
-        else
-        {
-            isConnected = false;
-        }
+        isConnected = networkInfo != null && networkInfo.isConnected();
         return isConnected;
     }
     private void getRealTimeDocument(QueryDocumentSnapshot doc)

@@ -32,6 +32,11 @@ import android.widget.Toast;
 
 import com.aspose.words.Document;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.netron90.correction.personnalize.Database.DocumentUser;
 import com.netron90.correction.personnalize.Database.PersonnalizeDatabase;
 import com.netron90.correction.personnalize.Services.DocEndListener;
@@ -42,6 +47,8 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by CHRISTIAN on 14/02/2019.
@@ -70,6 +77,8 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
     public static FragmentManager fragmentManager = null;
     public static android.app.FragmentManager fragmentManagerDatePicker = null;
     private boolean emptyFragment;
+    private ListenerRegistration messageListener = null;
+    private FirebaseFirestore dbFirestore;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -77,13 +86,39 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.tab_activity);
 
-        if(NewMessageListener.registration != null)
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+       /* if(NewMessageListener.registration == null)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+            Intent intentNewMessage = new Intent(getApplicationContext(), NewMessageListener.class);
+            startService(intentNewMessage);
+
+        }
+
+        if(DocEndListener.docEndRegistration == null)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("NEW_DOC_END", false).apply();
+            Intent intentDocEnd = new Intent(getApplicationContext(), DocEndListener.class);
+            startService(intentDocEnd);
+        }
+
+        if(DocPaidListener.docPaidRegistration == null)
+        {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("NEW_DOC_PAID", false).apply();
+            Intent intentDocPaid = new Intent(getApplicationContext(), DocPaidListener.class);
+            startService(intentDocPaid);
+        }*/
+
+        /*if(NewMessageListener.registration != null)
         {
             Log.d("ACTIVITY START", "registration message remove");
             NewMessageListener.registration.remove();
             NewMessageListener.registration= null;
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+
         }
 
         if(DocEndListener.docEndRegistration != null)
@@ -91,6 +126,7 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
             Log.d("ACTIVITY START", "registration message remove");
             DocEndListener.docEndRegistration.remove();
             DocEndListener.docEndRegistration = null;
+
         }
 
         if(DocPaidListener.docPaidRegistration != null)
@@ -98,46 +134,27 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
             Log.d("ACTIVITY START", "registration message remove");
             DocPaidListener.docPaidRegistration.remove();
             DocPaidListener.docPaidRegistration = null;
-        }
 
-//        if(NewMessageListener.registration != null)
-//        {
-//            NewMessageListener.registration.remove();
-//            NewMessageListener.registration = null;
-//        }
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        newDocumentServer = (TextView) findViewById(R.id.new_document_server);
-//        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        }*/
+
+
+        toolbar = findViewById(R.id.toolbar);
+        tabLayout = findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
+        newDocumentServer = findViewById(R.id.new_document_server);
+
         fragmentManager = getSupportFragmentManager();
         fragmentManagerDatePicker = getFragmentManager();
 
-//        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(MenuItem item) {
-//
-//                int idMenu = item.getItemId();
-//                if(idMenu == R.id.logout)
-//                {
-//                    drawerLayout.closeDrawers();
-//                    Toast.makeText(MainProcess.this, "LogOut clicked", Toast.LENGTH_SHORT).show();
-//                    FirebaseAuth.getInstance().signOut();
-//                    Intent loginIntent = new Intent(MainProcess.this, MainActivity.class);
-//                    finish();
-//                    startActivity(loginIntent);
-//                }
-//                return true;
-//            }
-//        });
+
 
         setSupportActionBar(toolbar);
         createNotificationChannel();
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         emptyFragment = sharedPreferences.getBoolean(DOCUMENT_EXIST, false);
         Boolean docAvailable = sharedPreferences.getBoolean(DOCUMENT_AVAILABLE, false);
+        dbFirestore = FirebaseFirestore.getInstance();
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -187,13 +204,19 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
     @Override
     protected void onStart() {
         super.onStart();
-        if(NewMessageListener.registration != null)
+
+       /* if(NewMessageListener.registration != null)
         {
-            Log.d("ACTIVITY START", "registration message remove");
+            Log.d("NEW MESSAGE SERVICE", "Service checkMessage is running");
             NewMessageListener.registration.remove();
             NewMessageListener.registration= null;
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            editor.putBoolean(NewMessageListener.CHECK_NEW_MESSAGE, false).apply();
+        }
+        else
+        {
+            //TODO: LAUNCH REGISTRATION FOR NEW MESSAGE
+            newMessageListener();
         }
 
         if(DocEndListener.docEndRegistration != null)
@@ -208,19 +231,46 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
             Log.d("ACTIVITY START", "registration message remove");
             DocPaidListener.docPaidRegistration.remove();
             DocPaidListener.docPaidRegistration = null;
-        }
+        }*/
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Intent intentDocEnd = new Intent(getApplicationContext(), DocEndListener.class);
-        Intent intentDocPaid = new Intent(getApplicationContext(), DocPaidListener.class);
-        Intent intentNewMessage = new Intent(getApplicationContext(), NewMessageListener.class);
-        startService(intentDocEnd);
-        startService(intentDocPaid);
-        startService(intentNewMessage);
+        if(NewMessageListener.registration == null)
+        {
+            Intent intentNewMessage = new Intent(getApplicationContext(), NewMessageListener.class);
+            startService(intentNewMessage);
+        }
+        if(DocEndListener.docEndRegistration == null)
+        {
+            Intent intentDocEnd = new Intent(getApplicationContext(), DocEndListener.class);
+            startService(intentDocEnd);
+        }
+
+        if(DocPaidListener.docPaidRegistration == null)
+        {
+            Intent intentDocPaid = new Intent(getApplicationContext(), DocPaidListener.class);
+            startService(intentDocPaid);
+        }
+
+
     }
+
+    private void newMessageListener() {
+        messageListener = dbFirestore.collection("Message").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot snapshots, @Nullable FirebaseFirestoreException e) {
+                if(e != null)
+                {
+                    return;
+                }
+
+
+            }
+        });
+    }
+
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -276,15 +326,25 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
                 Log.d("SDK INT", "SDK Version < 19");
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 //intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                //intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                intent.setType("*/*");
+                String[] mimeType = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                , "application/msword"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType);
                 startActivityForResult(Intent.createChooser(intent, "Choose your document"), FILE_BROWSER);
             }
             else{
                 Log.d("SDK INT", "SDK Version > 19");
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-                startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER);
+                //intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
+                intent.setType("*/*");
+                String[] mimeType = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        , "application/msword"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType);
+
+                startActivityForResult(Intent.createChooser(intent, "Choose your document"), FILE_BROWSER);
             }
 
         }
@@ -293,13 +353,24 @@ DiscussionDocAvailableFragment.OnFragmentInteractionListener{
             if(Build.VERSION.SDK_INT < 19)
             {
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                //intent.addCategory(Intent.CATEGORY_OPENABLE);
+                //intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                intent.setType("*/*");
+                String[] mimeType = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        , "application/msword"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType);
+
                 startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER_SEOND);
             }else{
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                //intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
+                intent.setType("*/*");
+                String[] mimeType = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        , "application/msword"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeType);
+
                 startActivityForResult(Intent.createChooser(intent, "Chose your document"), FILE_BROWSER_SEOND);
             }
 

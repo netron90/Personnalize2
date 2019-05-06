@@ -27,7 +27,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
     private Context context;
 
     public DiscussionDocAvailableAdapter(List<DocumentAvailable> docAvailable) {
-        this.listDocAvailable = docAvailable;
+        listDocAvailable = docAvailable;
     }
 
 
@@ -106,21 +106,21 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
             super(itemView);
 
             context            = itemView.getContext();
-            documentName       = (TextView) itemView.findViewById(R.id.document_name);
-            documentPage       = (TextView) itemView.findViewById(R.id.document_pages);
-            powerPointSwitch   = (TextView) itemView.findViewById(R.id.switch_power_point_option);
-            miseEnFormeSwitch  = (TextView) itemView.findViewById(R.id.switch_mise_en_forme_option);
-            deliveryDates      = (TextView) itemView.findViewById(R.id.text_date);
+            documentName       = itemView.findViewById(R.id.document_name);
+            documentPage       = itemView.findViewById(R.id.document_pages);
+            powerPointSwitch   = itemView.findViewById(R.id.switch_power_point_option);
+            miseEnFormeSwitch  = itemView.findViewById(R.id.switch_mise_en_forme_option);
+            deliveryDates      = itemView.findViewById(R.id.text_date);
 
-            iconDocReady       = (ImageView) itemView.findViewById(R.id.icon_doc_ready);
-            iconDocPaid        = (ImageView) itemView.findViewById(R.id.icon_doc_paid);
-            icon_chat          = (ImageView) itemView.findViewById(R.id.icon_chat);
-            docReady           = (RelativeLayout) itemView.findViewById(R.id.doc_ready_layout);
-            docPaidLayout      = (RelativeLayout) itemView.findViewById(R.id.doc_paid_layout);
+            iconDocReady       = itemView.findViewById(R.id.icon_doc_ready);
+            iconDocPaid        = itemView.findViewById(R.id.icon_doc_paid);
+            icon_chat          = itemView.findViewById(R.id.icon_chat);
+            docReady           = itemView.findViewById(R.id.doc_ready_layout);
+            docPaidLayout      = itemView.findViewById(R.id.doc_paid_layout);
 
-            deleteBlock        = (RelativeLayout) itemView.findViewById(R.id.block_delete_doc);
+            deleteBlock        = itemView.findViewById(R.id.block_delete_doc);
 
-            startDiscussion    = (RelativeLayout) itemView.findViewById(R.id.start_discussion);
+            startDiscussion    = itemView.findViewById(R.id.start_discussion);
 
             docReady.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -170,7 +170,7 @@ public class DiscussionDocAvailableAdapter extends RecyclerView.Adapter<Discussi
                     }
                     else
                     {
-                        Toast.makeText(context, "PARTIE CHAT DISPONIBLE", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(context, "PARTIE CHAT DISPONIBLE", Toast.LENGTH_SHORT).show();
                         Intent messageIntent = new Intent(context, ChatActivity.class);
                         messageIntent.putExtra("teamId", listDocAvailable.get(getLayoutPosition()).teamId);
                         context.startActivity(messageIntent);

@@ -9,5 +9,5 @@ import android.support.v4.app.FragmentManager;
 
 public interface ChangeFragment {
 
-    public void onChangeFragment(FragmentManager fragmentManager);
+    void onChangeFragment(FragmentManager fragmentManager);
 }

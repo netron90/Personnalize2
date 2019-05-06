@@ -63,9 +63,9 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_power_point_form);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        recyclerView = (RecyclerView) findViewById(R.id.container_power_point_data);
-        addDiapo = (FloatingActionButton) findViewById(R.id.fab_add_diapo);
+        toolbar = findViewById(R.id.toolbar);
+        recyclerView = findViewById(R.id.container_power_point_data);
+        addDiapo = findViewById(R.id.fab_add_diapo);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         position = getIntent().getIntExtra("itemPosition", 0);
         diapositiveNumber = 1;
@@ -111,10 +111,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
             Log.d("DIAPO IMAGE", "Diapositive position: " + diapositivePosition);
             if(requestCode == DiapositiveAdapter.DIAPOSITIVE_BROWSER && requestCode == RESULT_OK && null != data)
             {
-//                Log.d("DIAPO IMAGE", "Single image");
-//                imageUri = data.getData();
-//                SelectImage selectImage = new SelectImage();
-//                selectImage.execute();
+
 
             }
             else
@@ -355,29 +352,6 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
 
             }
 
-//            Log.d("SAVE DATA", "Taille de la liste des diao: " + DiapositiveAdapter.diapositiveFormatsList.size());
-//            //diapositiveAdapter.notifyItemChanged(diapositiveNumber);
-//
-//            //List<DiapositiveFormat> getDiapoSaved = db.userDao().selectDiapos(idDocument);
-//            for(int i = 0; i < DiapositiveAdapter.diapositiveFormatsList.size(); i++)
-//            {
-//
-//                //diapositiveAdapter.notifyItemChanged(i);
-//                String titleDiapo   = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoTitle;
-//                String descContent  = DiapositiveAdapter.diapositiveFormatsList.get(i).diapoDesc;
-//                int nbrImage        = DiapositiveAdapter.diapositiveFormatsList.get(i).nbrImage;
-//
-//                Log.d("SAVE DATA", "Add Data DIAPO id: " + DiapositiveAdapter.diapositiveFormatsList.get(i).id);
-//                Log.d("SAVE DATA", "Diapositive Number: " + diapositiveNumber);
-//                Log.d("SAVE DATA", "Preview diapo title: " + titleDiapo);
-//                Log.d("SAVE DATA", "Preview diapo content: " + descContent);
-//                Log.d("SAVE DATA", "Preview diapo Image: " + nbrImage);
-//
-//                db.userDao().updateDiapoTitle(titleDiapo, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
-//                db.userDao().updateDiapoDesc(descContent, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
-//                db.userDao().updateDiapoImage(nbrImage, DiapositiveAdapter.diapositiveFormatsList.get(i).id);
-//
-//            }
 
 
             return null;
@@ -452,19 +426,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                     DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
 
                     onLoad = true;
-////                    previewTitle = diapositiveTitle;
-////                    previewContent = diapositiveDescription;
-////                    onLoad = true;
-//
-//                    DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
-//
-//                    DiapositiveFormat d = new DiapositiveFormat();
-//                    d.id = currentDiapo.id;
-//                    d.diapoTitle = diapositiveTitle;
-//                    d.diapoDesc = diapositiveDescription;
-//                    d.nbrImage = diapoImagePathsSelected.size();
 
-                    //DiapositiveAdapter.diapositiveFormatsList.add(diapositivePosition, d);
 
                    return null;
 
@@ -491,17 +453,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                     DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
 
                     onLoad = true;
-//                    previewTitle = diapositiveTitle;
-//                    previewContent = diapositiveDescription;
-//                    onLoad = true;
 
-//                    DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
-//
-//                    DiapositiveFormat d = new DiapositiveFormat();
-//                    d.id = currentDiapo.id;
-//                    d.diapoTitle = diapositiveTitle;
-//                    d.diapoDesc = diapositiveDescription;
-//                    d.nbrImage = diapoImagePathsSelected.size();
                     return null;
 
                 }
@@ -551,17 +503,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                         DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
 
                         onLoad = true;
-//                        previewTitle = diapositiveTitle;
-//                        previewContent = diapositiveDescription;
-//                        onLoad = true;
 
-//                        DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
-//
-//                        DiapositiveFormat d = new DiapositiveFormat();
-//                        d.id = currentDiapo.id;
-//                        d.diapoTitle = diapositiveTitle;
-//                        d.diapoDesc = diapositiveDescription;
-//                        d.nbrImage = diapoImagePathsSelected.size();
 
                     }
                     else
@@ -596,19 +538,7 @@ public class PowerPointForm extends AppCompatActivity implements AddPictureDiapo
                         DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc = diapositiveDescription;
 
                         onLoad = true;
-//                        String diapositiveTitle = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoTitle;
-//                        String diapositiveDescription = DiapositiveAdapter.diapositiveFormatsList.get(diapositivePosition).diapoDesc;
-//
-//                        previewTitle = diapositiveTitle;
-//                        previewContent = diapositiveDescription;
-//
-//                        DiapositiveAdapter.diapositiveFormatsList.remove(diapositivePosition);
-//
-//                        DiapositiveFormat d = new DiapositiveFormat();
-//                        d.id = currentDiapo.id;
-//                        d.diapoTitle = diapositiveTitle;
-//                        d.diapoDesc = diapositiveDescription;
-//                        d.nbrImage = diapoImagePathsSelected.size();
+
 
                     }
 

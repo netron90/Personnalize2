@@ -20,6 +20,12 @@ public class UserMessageDb {
     @ColumnInfo(name = "user_id")
     public String userId;
 
+    @ColumnInfo(name = "team_id")
+    public String teamId;
+
+    @ColumnInfo(name = "author")
+    public String author;
+
     @ColumnInfo(name = "message_time")
     public String messageTime;
 
@@ -40,5 +46,13 @@ public class UserMessageDb {
 
     public String getMessageTime() {
         return messageTime;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public String getAuthor() {
+        return author;
     }
 }

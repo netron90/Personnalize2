@@ -7,7 +7,7 @@
     <color name="gradientStartColor">#004c40</color>
     <color name="gradientEndColor">#025e4f</color>
     <color name="colorWhite">#ffffff</color>
-    <color name="colorLigthWhite">#b4ffffff</color>
+    <color name="colorLigthWhite">#e9efefef</color>
     <color name="colorLigthBlack">#b4545454</color>
     <color name="colorText">#757575</color>
     <color name="colorDarkhBlack">#df404040</color>

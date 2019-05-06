@@ -101,7 +101,7 @@ public class DiscussionDocAvailableFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_discussion_doc_available, container, false);
-        recyclerView = (RecyclerView) view.findViewById(R.id.docAvailableRecyclerView);
+        recyclerView = view.findViewById(R.id.docAvailableRecyclerView);
         context = container.getContext();
 
         if(MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false) == true)
@@ -115,104 +115,6 @@ public class DiscussionDocAvailableFragment extends Fragment {
             MainProcess.fragmentManager.beginTransaction().replace(R.id.dicussion_available_doc, docAvailableFragment).commit();
 
         }
-
-//
-//        if(MainProcess.sharedPreferences.getBoolean(MainProcess.DOCUMENT_AVAILABLE, false) == true)
-//        {
-//            getAvailableDocument = new GetAvailableDocument();
-//            getAvailableDocument.execute();
-//        }
-//        else{
-//            dbFireStore = FirebaseFirestore.getInstance();
-//            context = container.getContext();
-//
-//            SharedPreferences.Editor editor = MainProcess.sharedPreferences.edit();
-//            editor.putBoolean(MainProcess.DOCUMENT_AVAILABLE, true).commit();
-//
-//            docAvailableAdapter = new DiscussionDocAvailableAdapter(null);
-//            recyclerView.setAdapter(docAvailableAdapter);
-//            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-//            recyclerView.setItemAnimator(new DefaultItemAnimator());
-//
-//            registration = dbFireStore.collection("Document").addSnapshotListener(new EventListener<QuerySnapshot>() {
-//                @Override
-//                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-//                    if(e != null)
-//                    {
-//                        Log.d("LISTENE UPDATE", "Listen failed. ", e);
-//                        return;
-//                    }
-//
-//                    if(value.isEmpty())
-//                    {}
-//                    else
-//                    {
-//                        int compteur = 0;
-//                        for(QueryDocumentSnapshot doc : value)
-//                        {
-//                            if(value.size() - 1 == compteur)
-//                            {
-//                                Log.d("VALUE SNAPCHAT", "Document firebase: " + doc);
-//                                DocumentAvailable document = new DocumentAvailable();
-//
-//                                if(doc.get("id") != null)
-//                                {
-//                                    document.idServer = (Long) doc.get("id");
-//                                }
-//
-//                                if(doc.get("documentName") != null)
-//                                {
-//                                    document.documentName = doc.getString("documentName");
-//                                }
-//                                if(doc.get("pageNumber") != null)
-//                                {
-//                                    document.pageNumber = (Long) doc.get("pageNumber");
-//                                }
-//
-//                                if(doc.get("powerPoint") != null)
-//                                {
-//                                    document.powerPoint = (boolean) doc.get("powerPoint");
-//                                }
-//                                if(doc.get("miseEnForme") != null)
-//                                {
-//                                    document.miseEnForme = (boolean) doc.get("miseEnForme");
-//                                }
-//                                if(doc.get("documentName") != null)
-//                                {
-//                                    document.deliveryDate = doc.getString("deliveryDate");
-//                                }
-//                                if(doc.get("docEnd") != null)
-//                                {
-//                                    document.docEnd = (boolean) doc.get("docEnd");
-//                                }
-//                                if(doc.get("docPaid") != null)
-//                                {
-//                                    document.documentPaid = (boolean) doc.get("docPaid");
-//                                }
-//
-////                        documentAvailables.add(document);
-//                                documentAvailables = document;
-//
-//                                insertNewDocAvailable = new InsertNewDocAvailable();
-//                                insertNewDocAvailable.execute();
-//
-//                            }
-//                            else {
-//                                compteur++;
-//                            }
-//
-//                        }
-//                    }
-//
-//                }
-//            });
-//
-//
-//        }
-//
-//
-
-
 
         return view;
     }

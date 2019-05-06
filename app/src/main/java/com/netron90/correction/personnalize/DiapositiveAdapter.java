@@ -44,7 +44,7 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
     private ViewHolder viewHolder;
 
     public DiapositiveAdapter(List<DiapositiveFormat> diapositiveFormats, Context context) {
-        this.diapositiveFormatsList = diapositiveFormats;
+        diapositiveFormatsList = diapositiveFormats;
         this.context = context;
     }
 
@@ -121,13 +121,13 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
         public ViewHolder(View itemView) {
             super(itemView);
 
-            deleteDiapo   = (ImageView)itemView.findViewById(R.id.delete_diapo);
-            diapoTitle    = (TextView)itemView.findViewById(R.id.diapo_title);
-            diapoContent  = (TextView) itemView.findViewById(R.id.diapo_text_content);
-            nbrImageDiapo = (TextView) itemView.findViewById(R.id.image_diapo);
+            deleteDiapo   = itemView.findViewById(R.id.delete_diapo);
+            diapoTitle    = itemView.findViewById(R.id.diapo_title);
+            diapoContent  = itemView.findViewById(R.id.diapo_text_content);
+            nbrImageDiapo = itemView.findViewById(R.id.image_diapo);
 //            AddPictureDiapoFragment addPictureDiapoFragment = new AddPictureDiapoFragment();
 //            MainProcess.fragmentManager.beginTransaction().replace(R.id.add_new_pictures, addPictureDiapoFragment).commit();
-            addNewPictures= (RelativeLayout) itemView.findViewById(R.id.add_new_pictures);
+            addNewPictures= itemView.findViewById(R.id.add_new_pictures);
 
 
             DiapositiveAdapter.diapoHolderTitle = diapoTitle;
@@ -135,22 +135,6 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
 
 
 
-//            diapoContent.addTextChangedListener(new TextWatcher() {
-//                @Override
-//                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//                }
-//
-//                @Override
-//                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//                }
-//
-//                @Override
-//                public void afterTextChanged(Editable editable) {
-//                    DiapositiveAdapter.this.notifyItemChanged(getLayoutPosition());
-//                }
-//            });
 
 
             deleteDiapo.setOnClickListener(new View.OnClickListener() {
@@ -197,15 +181,7 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
 
 
                     }
-//                    new PowerPointForm.selectDiapoImage() {
-//                        @Override
-//                        public void onSelectDiapoImage(PowerPointForm powerPointForm) {
-//                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//                            intent.addCategory(Intent.CATEGORY_OPENABLE);
-//                            intent.setType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-//                            powerPointForm.startActivityForResult(Intent.createChooser(intent, "Selectionner des images"), DIAPOSITIVE_BROWSER);
-//                        }
-//                    };
+
                 }
             });
         }
@@ -248,37 +224,6 @@ public class DiapositiveAdapter extends RecyclerView.Adapter<DiapositiveAdapter.
             }
 
 
-
-//
-//            int idDiapositive = diapositiveFormatsList.get(integers[0]).id;
-////            for(int i = 0; i < diapositiveFormatsList.size(); i++)
-////            {
-////                Log.d("DELETE DIAPO", "ID item selected: " + diapositiveFormatsList.get(integers[0]).id);
-////            }
-//            if(diapositiveFormatsList.size() == 1)
-//            {
-//                return false;
-//            }
-//            else {
-//                db.userDao().deleteOneDiapo(diapositiveFormatsList.get(integers[0]).id);
-//
-//                PowerPointForm.diapositiveNumber = PowerPointForm.diapositiveNumber - 1;
-//                diapositiveFormatsList.clear();
-//
-//                List<DiapositiveFormat> allDiapo = db.userDao().selectDiapos(PowerPointForm.documentUser.id);
-//                for(int i = 0; i < allDiapo.size(); i++)
-//                {
-//                    // Log.d("DELETE DIAPO", "ID item selected: " + diapositiveFormatsList.get(integers[0]).id);
-//                    DiapositiveFormat diapositiveFormat = new DiapositiveFormat();
-//                    diapositiveFormat.id = allDiapo.get(i).id;
-//                    diapositiveFormat.diapoTitle = "Diapositive " + String.valueOf(i+1);
-//                    db.userDao().updateDiapoTitle(diapositiveFormat.diapoTitle, idDiapositive);
-//                    diapositiveFormat.diapoDesc = allDiapo.get(i).diapoDesc;
-//                    diapositiveFormat.nbrImage = allDiapo.get(i).nbrImage;
-//                    diapositiveFormatsList.add(diapositiveFormat);
-//                }
-//                return true;
-//            }
         }
 
         @Override

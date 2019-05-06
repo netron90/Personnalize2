@@ -72,9 +72,9 @@ public class MemoireFragmentEmpty extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memoire_empty, container, false);
-        addFile = (FloatingActionButton) view.findViewById(R.id.add_file);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressbar_doc_inprogress);
-        documentCreating = (TextView) view.findViewById(R.id.text_progressbar);
+        addFile = view.findViewById(R.id.add_file);
+        progressBar = view.findViewById(R.id.progressbar_doc_inprogress);
+        documentCreating = view.findViewById(R.id.text_progressbar);
 
         addFile.setOnClickListener(new View.OnClickListener() {
             @Override

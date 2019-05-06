@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +17,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -34,27 +38,30 @@ public class PersonnalizeForm extends AppCompatActivity {
     public static final String PERSONNALIZE_COMPTE = "personnalize_compte";
     private Toolbar toolbar;
     private ProgressDialog pd;
+    private FirebaseFirestore dbFirestore;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personnalize_form);
 
-        userPseudo = (EditText) findViewById(R.id.username);
-        userPassword = (EditText) findViewById(R.id.password);
-        personnalizeLoginBtn = (Button) findViewById(R.id.personnalize_login);
+        userPseudo = findViewById(R.id.username);
+        userPassword = findViewById(R.id.password);
+        personnalizeLoginBtn = findViewById(R.id.personnalize_login);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Se connecter");
+
+        dbFirestore = FirebaseFirestore.getInstance();
 
         personnalizeLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                String uploadingMessage = "Wait a moment";
+                String uploadingMessage = "Connexion";
                 pd = new ProgressDialog(PersonnalizeForm.this);
-                pd.setTitle("Document uploading");
+                pd.setTitle("Authentification de l'utilisateur");
                 pd.setMessage(uploadingMessage);
                 pd.setIndeterminate(false);
                 pd.show();
@@ -109,6 +116,8 @@ public class PersonnalizeForm extends AppCompatActivity {
                                     Toast.makeText(PersonnalizeForm.this, "Une erreur est survenue. Vérifier vos informations de compter et réessayer.", Toast.LENGTH_SHORT).show();
                                 }
                                 else {
+                                    UsersApp usersApp = new UsersApp();
+
                                     String nomUser = response.getJSONObject("userInfo").get("nom").toString() + " " + response.getJSONObject("userInfo").get("prenom").toString();
                                     String emailUser = response.getJSONObject("userInfo").get("email").toString();
                                     String contactUser = response.getJSONObject("userInfo").get("contact").toString();
@@ -123,10 +132,33 @@ public class PersonnalizeForm extends AppCompatActivity {
                                     editor.putString(MainActivity.USER_EMAIL, emailUser).commit();
                                     editor.putString(MainActivity.USER_PHONE, contactUser).commit();
                                     editor.putString(MainActivity.USER_ID, idUser).commit();
-                                    Intent intent = new Intent(PersonnalizeForm.this, MainProcess.class);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK) ;
-                                    finish();
-                                    startActivity(intent);
+
+                                    usersApp.userIdApp = idUser;
+                                    usersApp.nameUserApp = nomUser;
+                                    usersApp.emailUserApp = emailUser;
+                                    usersApp.contactUserapp = contactUser;
+                                    usersApp.userAppFlag = true;
+
+                                    dbFirestore.collection("users").document(idUser).set(usersApp)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Intent intent = new Intent(PersonnalizeForm.this, MainProcess.class);
+                                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK) ;
+                                                    finish();
+                                                    startActivity(intent);
+                                                }
+                                            }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+//                                            Log.d("SERVEUR RES SUCCES", "Serveur login response failed!: Status code: " + statusCode + " " +
+//                                                    "response String: " + responseString + " Throwable: " + throwable);
+                                            Toast.makeText(PersonnalizeForm.this, "Une erreur est survenue. Vérifier vos informations de compte et réessayer.", Toast.LENGTH_SHORT).show();
+
+                                        }
+                                    });
+
+
                                 }
 //                                editor.putString(MainActivity.USER_NAME, (String)response.getJSONObject()get("nom")+" "+(String)response.get("prenom")).commit();
 //                                editor.putString(MainActivity.USER_EMAIL, (String)response.get("email")).commit();
@@ -170,12 +202,6 @@ public class PersonnalizeForm extends AppCompatActivity {
     {
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if(networkInfo != null && networkInfo.isConnected())
-        {
-            return true;
-        }
-        else{
-            return false;
-        }
+        return networkInfo != null && networkInfo.isConnected();
     }
 }

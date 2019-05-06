@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
-        comptePersonnalize = (RelativeLayout) findViewById(R.id.compte_personnalize);
+        comptePersonnalize = findViewById(R.id.compte_personnalize);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
 
@@ -83,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        facebookButton = (LoginButton) findViewById(R.id.login_button);
-        buttonGmail = (SignInButton) findViewById(R.id.gmail_singin_button);
+        facebookButton = findViewById(R.id.login_button);
+        buttonGmail = findViewById(R.id.gmail_singin_button);
 
         facebookButton.setReadPermissions("email", "public_profile");
         facebookButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {

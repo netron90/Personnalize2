@@ -76,10 +76,10 @@ public class MemoireFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_memoire, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        fab          = (FloatingActionButton) view.findViewById(R.id.add_file_exist);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressbar_doc_inprogress);
-        documentCreating = (TextView) view.findViewById(R.id.text_progressbar);
+        recyclerView = view.findViewById(R.id.recycler_view);
+        fab          = view.findViewById(R.id.add_file_exist);
+        progressBar = view.findViewById(R.id.progressbar_doc_inprogress);
+        documentCreating = view.findViewById(R.id.text_progressbar);
 
         documentAdapter = new DocumentAdapter(MainProcess.documentUserQuery);
         recyclerView.setAdapter(documentAdapter);

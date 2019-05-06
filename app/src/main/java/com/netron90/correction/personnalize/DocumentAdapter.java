@@ -48,7 +48,7 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
 
 
     public DocumentAdapter(List<DocumentUser> documentUser) {
-        this.documentUserList = documentUser;
+        documentUserList = documentUser;
     }
 
     @Override
@@ -86,17 +86,17 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
 
             //position = getLayoutPosition();
             context            = itemView.getContext();
-            iconDelete         = (ImageView) itemView.findViewById(R.id.delete_doc);
-            documentName       = (TextView) itemView.findViewById(R.id.document_name);
-            documentPage       = (TextView) itemView.findViewById(R.id.document_pages);
-            powerPointSwitch   = (Switch) itemView.findViewById(R.id.switch_power_point_option);
-            miseEnFormeSwitch  = (Switch) itemView.findViewById(R.id.switch_mise_en_forme_option);
-            iconEditPowerPoint = (ImageView) itemView.findViewById(R.id.icon_edit_power_point);
-            deliveryDates       = (TextView) itemView.findViewById(R.id.text_date);
-            deliveryDate       = (TextView) itemView.findViewById(R.id.text_date);
-            editPowerPoint     = (RelativeLayout) itemView.findViewById(R.id.edit_power_point);
-            editDate           = (RelativeLayout) itemView.findViewById(R.id.edit_date);
-            iconSend           = (RelativeLayout) itemView.findViewById(R.id.send_document);
+            iconDelete         = itemView.findViewById(R.id.delete_doc);
+            documentName       = itemView.findViewById(R.id.document_name);
+            documentPage       = itemView.findViewById(R.id.document_pages);
+            powerPointSwitch   = itemView.findViewById(R.id.switch_power_point_option);
+            miseEnFormeSwitch  = itemView.findViewById(R.id.switch_mise_en_forme_option);
+            iconEditPowerPoint = itemView.findViewById(R.id.icon_edit_power_point);
+            deliveryDates       = itemView.findViewById(R.id.text_date);
+            deliveryDate       = itemView.findViewById(R.id.text_date);
+            editPowerPoint     = itemView.findViewById(R.id.edit_power_point);
+            editDate           = itemView.findViewById(R.id.edit_date);
+            iconSend           = itemView.findViewById(R.id.send_document);
 
             powerPointSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -296,18 +296,9 @@ public class DocumentAdapter extends RecyclerView.Adapter<DocumentAdapter.ViewHo
             }
             //)remove element from arrayList of User documents
             //documentUserList.remove(position);
-            if(documentUserList.size() == 0)
-            {
-
-//                editor  = MainProcess.sharedPreferences.edit();
+            //                editor  = MainProcess.sharedPreferences.edit();
 //                editor.putBoolean(MainProcess.DOCUMENT_EXIST, false).commit();
-                return true;
-            }
-            else
-            {
-
-                return false;
-            }
+            return documentUserList.size() == 0;
 
 
             //return null;

@@ -4,10 +4,11 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.netron90.correction.personnalize"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        multiDexEnabled true
+        versionCode 4
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -16,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+
 }
 
 dependencies {
@@ -42,7 +47,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:18.0.1'
     implementation 'com.google.firebase:firebase-storage:16.0.5'
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
-
+    implementation 'com.android.support:multidex:1.0.3'
 }
 
 

@@ -41,14 +41,23 @@
             android:id="@+id/app_version"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Developed by netron90 v1.0"
+            android:text="Developed by netron90 v1.2"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/text_personnalize"
             android:layout_marginTop="16dp"/>
         <TextView
+            android:id="@+id/app_politique"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Politique de confidentialite"
+            android:layout_centerHorizontal="true"
             android:layout_below="@id/app_version"
+            android:textColor="@color/colorAccentDark"
+            android:layout_marginTop="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/app_politique"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
             android:text="Copyright © 2019"/>
